@@ -1,0 +1,6 @@
+@OmniMind.WebApi_HostAddress = http://localhost:5068
+
+GET {{OmniMind.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

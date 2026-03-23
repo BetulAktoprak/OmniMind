@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Mood\" />
+    <Folder Include="Journal\" />
+    <Folder Include="AI\" />
+    <Folder Include="Social\" />
+    <Folder Include="Users\" />
+  </ItemGroup>
+
+</Project>
