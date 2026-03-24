@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,16 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\" />
-    <Folder Include="Common\Behaviors\" />
-    <Folder Include="Common\Models\" />
-    <Folder Include="Common\Exceptions\" />
-    <Folder Include="Features\Mood\Commands\AddMood\" />
-    <Folder Include="Features\Mood\Dtos\" />
-    <Folder Include="Features\Mood\Queries\GetMoodHistory\" />
-    <Folder Include="Features\Journal\" />
-    <Folder Include="Features\AI\" />
-    <Folder Include="Features\Social\" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OmniMind.Domain\OmniMind.Domain.csproj" />
   </ItemGroup>
 
 </Project>

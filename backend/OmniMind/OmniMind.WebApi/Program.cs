@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OmniMind.Application;
+using OmniMind.Application.Abstractions;
+using OmniMind.Infrastructure;
 using OmniMind.Infrastructure.Persistence.Context;
 using OmniMind.WebApi.Middlewares;
 using OmniMind.WebApi.Services.Auth;
@@ -21,6 +24,10 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<OmniMindDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<OmniMindDbContext>());
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructureServices();
 
 builder.Services.AddCors(opt =>
 {

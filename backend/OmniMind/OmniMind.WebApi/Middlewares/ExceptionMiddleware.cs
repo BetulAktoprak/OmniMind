@@ -1,5 +1,6 @@
-﻿using System.Net;
+using System.Net;
 using System.Text.Json;
+using OmniMind.Application.Common.Exceptions;
 
 namespace OmniMind.WebApi.Middlewares;
 
@@ -21,9 +22,16 @@ public class ExceptionMiddleware
         catch (Exception ex)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            var (status, message) = ex switch
+            {
+                NotFoundException => (HttpStatusCode.NotFound, ex.Message),
+                ArgumentException => (HttpStatusCode.BadRequest, ex.Message),
+                InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),
+                _ => (HttpStatusCode.BadRequest, ex.Message)
+            };
 
-            var payload = new { message = ex.Message };
+            context.Response.StatusCode = (int)status;
+            var payload = new { message };
             await context.Response.WriteAsync(JsonSerializer.Serialize(payload));
         }
     }

@@ -2,15 +2,26 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const BASE_URL = Platform.OS === "android"
-  ? "http://10.0.2.2:5068"
-  : "http://localhost:5068";
+/**
+ * Fiziksel cihaz / farklı makine: .env içinde EXPO_PUBLIC_API_URL=http://192.168.x.x:5068
+ * Android emülatör: 10.0.2.2
+ * iOS simülatör: localhost
+ */
+const fromEnv =
+  typeof process.env.EXPO_PUBLIC_API_URL === "string" &&
+  process.env.EXPO_PUBLIC_API_URL.length > 0
+    ? process.env.EXPO_PUBLIC_API_URL.replace(/\/$/, "")
+    : null;
+
+const fallback =
+  Platform.OS === "android" ? "http://10.0.2.2:5068" : "http://localhost:5068";
+
+export const API_BASE_URL = fromEnv ?? fallback;
 
 export const http = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
-
 
 http.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem("accessToken");
@@ -22,9 +33,7 @@ http.interceptors.request.use(async (config) => {
 });
 
 http.interceptors.response.use(
-  (res) => {
-    return res;
-  },
+  (res) => res,
   (err) => {
     console.log(
       "AXIOS ERR <=",

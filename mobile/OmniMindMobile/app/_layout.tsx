@@ -23,6 +23,7 @@ export default function Layout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="journal" options={{ headerShown: false }} />
     </Stack>
   );
 }

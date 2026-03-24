@@ -13,17 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { loginApi } from "../src/api/auth.api";
 import { saveAuth } from "../src/auth/auth.store";
-
-const BG = "#230b21"; // index ile aynı arka plan
-const TEXT = "rgba(252,252,253,0.96)";
-const MUTED = "rgba(226,232,240,0.82)";
-const SOFT = "rgba(148,163,184,0.28)";
-
-const FONT = {
-  title: "Inter_800ExtraBold",
-  semi: "Inter_600SemiBold",
-  reg: "Inter_400Regular",
-};
+import { colors, fonts as FONT } from "../src/theme/colors";
 
 export default function Login() {
   const router = useRouter();
@@ -49,7 +39,7 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -87,7 +77,7 @@ export default function Login() {
               <Text style={styles.label}>Email veya kullanıcı adı</Text>
               <TextInput
                 placeholder="ornek@mail.com"
-                placeholderTextColor="rgba(255,255,255,0.35)"
+                placeholderTextColor={colors.placeholderOnLight}
                 value={login}
                 onChangeText={setLogin}
                 autoCapitalize="none"
@@ -100,7 +90,7 @@ export default function Login() {
               <Text style={styles.label}>Şifre</Text>
               <TextInput
                 placeholder="••••••••"
-                placeholderTextColor="rgba(255,255,255,0.35)"
+                placeholderTextColor={colors.placeholderOnLight}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -143,10 +133,10 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  safe: { flex: 1, backgroundColor: BG },
+  safe: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: colors.background,
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 18,
@@ -157,7 +147,7 @@ const styles = StyleSheet.create({
     width: 420,
     height: 420,
     borderRadius: 420,
-    backgroundColor: "rgba(195, 142, 212, 0.38)", // index'e yakın mor-pembe blob
+    backgroundColor: colors.blobTint,
     top: -260,
     left: -200,
   },
@@ -166,7 +156,7 @@ const styles = StyleSheet.create({
     left: undefined,
     right: -220,
     bottom: -260,
-    backgroundColor: "rgba(240, 185, 229, 0.26)",
+    backgroundColor: colors.blobTint2,
   },
   darkOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -183,15 +173,15 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(148,163,184,0.18)",
+    backgroundColor: colors.white12,
   },
   backText: {
-    color: TEXT,
+    color: colors.textOnDark,
     fontSize: 16,
     fontFamily: FONT.semi,
   },
   brand: {
-    color: TEXT,
+    color: colors.textOnDark,
     fontSize: 15,
     letterSpacing: 0.4,
     fontFamily: FONT.semi,
@@ -200,7 +190,7 @@ const styles = StyleSheet.create({
     marginTop: 26,
   },
   kicker: {
-    color: MUTED,
+    color: colors.mutedOnDark,
     fontSize: 12.5,
     letterSpacing: 0.6,
     textTransform: "uppercase",
@@ -208,7 +198,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginTop: 8,
-    color: TEXT,
+    color: colors.textOnDark,
     fontSize: 32,
     lineHeight: 34,
     letterSpacing: -0.6,
@@ -216,7 +206,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     marginTop: 10,
-    color: MUTED,
+    color: colors.mutedOnDark,
     fontSize: 14.2,
     lineHeight: 21,
     fontFamily: FONT.reg,
@@ -226,9 +216,9 @@ const styles = StyleSheet.create({
     marginTop: 26,
     borderRadius: 22,
     padding: 18,
-    backgroundColor: "rgba(252,252,253,0.96)",
+    backgroundColor: colors.cardBackground,
     borderWidth: 1,
-    borderColor: "rgba(148,163,184,0.35)",
+    borderColor: colors.cardBorder,
   },
   cardHeader: {
     flexDirection: "row",
@@ -240,10 +230,10 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 999,
-    backgroundColor: "#c38ed4",
+    backgroundColor: colors.accentDot,
   },
   cardTitle: {
-    color: "rgba(15,23,42,0.9)",
+    color: colors.labelOnLight,
     fontSize: 14,
     fontFamily: FONT.semi,
   },
@@ -251,7 +241,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   label: {
-    color: "rgba(15,23,42,0.9)",
+    color: colors.labelOnLight,
     fontSize: 12.5,
     marginBottom: 6,
     fontFamily: FONT.semi,
@@ -261,15 +251,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: SOFT,
-    backgroundColor: "#f3f4f6",
-    color: "rgba(15,23,42,0.96)",
+    borderColor: colors.inputBorder,
+    backgroundColor: colors.inputBackground,
+    color: colors.textOnLight,
     fontFamily: FONT.reg,
     fontSize: 14,
   },
   error: {
     marginTop: 10,
-    color: "#FCA5A5",
+    color: colors.error,
     fontSize: 12.5,
     fontFamily: FONT.semi,
   },
@@ -279,13 +269,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#593854",
+    backgroundColor: colors.primary,
   },
   primaryDisabled: {
     opacity: 0.6,
   },
   primaryText: {
-    color: "rgba(249,250,251,0.98)",
+    color: colors.textOnPrimary,
     fontSize: 16,
     fontFamily: FONT.title,
     letterSpacing: -0.2,
@@ -295,19 +285,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   secondaryText: {
-    color: "rgba(15,23,42,0.94)",
+    color: colors.textOnLight,
     fontSize: 13.5,
     fontFamily: FONT.semi,
   },
   secondaryHint: {
     marginTop: 2,
-    color: "rgba(71,85,105,0.9)",
+    color: colors.mutedOnLight,
     fontSize: 12,
     fontFamily: FONT.reg,
   },
   footerNote: {
     marginTop: 20,
-    color: "rgba(255,255,255,0.45)",
+    color: colors.footerOnDark,
     fontSize: 11.5,
     lineHeight: 16,
     textAlign: "center",

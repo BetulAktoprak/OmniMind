@@ -12,20 +12,7 @@ import {
   View,
 } from "react-native";
 import { getToken } from "../src/auth/auth.store";
-
-const BG = "#230b21"; // kullanıcı seçimi: mor-pembe arka plan
-const TEXT = "rgba(252,252,253,0.96)"; // başlık ve ana metinler için açık ton
-const MUTED = "rgba(226,232,240,0.82)"; // ikincil metinler için yumuşak açık gri
-// SOFT / SOFT2 gelecekte kart kenarları vb. için kullanılabilir
-const SOFT = "rgba(148,163,184,0.18)";
-const SOFT2 = "rgba(148,163,184,0.10)";
-
-// Fonts (works if you loaded Inter in _layout; otherwise system font shows)
-const FONT = {
-  title: "Inter_800ExtraBold",
-  semi: "Inter_600SemiBold",
-  reg: "Inter_400Regular",
-};
+import { colors, fonts as FONT } from "../src/theme/colors";
 
 type MoodKey = "calm" | "focused" | "happy" | "tired" | "anxious";
 
@@ -33,12 +20,11 @@ const MOODS: Record<
   MoodKey,
   { label: string; emoji: string; accent: string; accent2: string }
 > = {
-  // Yeşil yerine mor-pembe tonları
-  calm: { label: "Sakin", emoji: "🌿", accent: "#c38ed4", accent2: "#f0b9e5" },
-  focused: { label: "Odak", emoji: "🎯", accent: "#4b7c78", accent2: "#80a6a2" },
-  happy: { label: "İyi", emoji: "☀️", accent: "#d9a66f", accent2: "#f3c58b" },
-  tired: { label: "Yorgun", emoji: "🌙", accent: "#4B5563", accent2: "#9CA3AF" },
-  anxious: { label: "Stresli", emoji: "⚡", accent: "#EF4444", accent2: "#FCA5A5" },
+  calm: { label: "Sakin", emoji: "🌿", accent: "#7f9b78", accent2: "#c8d6c2" },
+  focused: { label: "Odak", emoji: "🎯", accent: "#6d8f86", accent2: "#b5cec6" },
+  happy: { label: "İyi", emoji: "☀️", accent: "#b89a6e", accent2: "#e5d4bc" },
+  tired: { label: "Yorgun", emoji: "🌙", accent: "#8f968a", accent2: "#cfd4c8" },
+  anxious: { label: "Stresli", emoji: "⚡", accent: "#a67b76", accent2: "#dcc9c6" },
 };
 
 export default function Landing() {
@@ -130,7 +116,7 @@ export default function Landing() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <View style={styles.container}>
         {/* Background: minimal, mood-based accents */}
         <Animated.View pointerEvents="none" style={[styles.blob, styles.blob1, blobStyle]} />
@@ -146,13 +132,13 @@ export default function Landing() {
 
         {/* Brand row */}
         <View style={styles.topRow}>
-          <View style={[styles.logoMark, { borderColor: "rgba(255,255,255,0.10)" }]}>
+          <View style={[styles.logoMark, { borderColor: colors.white10 }]}>
             <View style={[styles.logoDot, { backgroundColor: accent }]} />
           </View>
           <Text style={styles.brand}>OmniMind</Text>
 
           <View style={{ flex: 1 }} />
-          <View style={[styles.moodPill, { borderColor: "rgba(255,255,255,0.10)" }]}>
+          <View style={[styles.moodPill, { borderColor: colors.white10 }]}>
             <Text style={styles.moodPillText}>
               {MOODS[mood].emoji} {MOODS[mood].label}
             </Text>
@@ -164,8 +150,8 @@ export default function Landing() {
           <Text style={styles.kicker}>Günlük • Ruh Hali • İçgörü</Text>
 
           <View style={styles.titleBox}>
-            <Text style={[styles.titleGlow, { textShadowColor: accent }]}>Her şey akılda.</Text>
-            <Text style={styles.title}>Her şey akılda.</Text>
+            <Text style={[styles.titleGlow, { textShadowColor: accent }]}>Aklımda.</Text>
+            <Text style={styles.title}>Aklımda.</Text>
             <View style={[styles.titleUnderline, { backgroundColor: accent }]} />
           </View>
 
@@ -204,7 +190,7 @@ export default function Landing() {
             <View style={styles.previewTop}>
               <Text style={styles.previewTitle}>Bugünün Kaydı</Text>
               <View style={[styles.previewTag, { borderColor: `${accent}66`, backgroundColor: `${accent}18` }]}>
-                <Text style={[styles.previewTagText, { color: "rgba(255,255,255,0.85)" }]}>
+                <Text style={[styles.previewTagText, { color: colors.white90 }]}>
                   {MOODS[mood].emoji} {MOODS[mood].label}
                 </Text>
               </View>
@@ -242,7 +228,7 @@ export default function Landing() {
             onPress={() => router.push("/register")}
             style={({ pressed }) => [
               styles.secondaryBtn,
-              { borderColor: "rgba(255,255,255,0.16)" },
+              { borderColor: colors.white16 },
               pressed && styles.pressed,
             ]}
           >
@@ -260,10 +246,10 @@ export default function Landing() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: BG },
+  safe: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: colors.background,
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 18,
@@ -288,14 +274,14 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.white06,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   logoDot: { width: 10, height: 10, borderRadius: 10 },
   brand: {
-    color: "rgba(255,255,255,0.86)",
+    color: colors.white86,
     fontSize: 14,
     letterSpacing: 0.4,
     fontFamily: FONT.semi,
@@ -305,14 +291,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.white06,
     borderWidth: 1,
   },
-  moodPillText: { color: "rgba(255,255,255,0.80)", fontSize: 12, fontFamily: FONT.semi },
+  moodPillText: { color: colors.white80, fontSize: 12, fontFamily: FONT.semi },
 
   hero: { marginTop: 25 },
   kicker: {
-    color: "rgba(255,255,255,0.70)",
+    color: colors.subtleOnDark,
     fontSize: 12.5,
     letterSpacing: 0.8,
     textTransform: "uppercase",
@@ -325,12 +311,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: colors.white05,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: colors.white08,
   },
   title: {
-    color: TEXT,
+    color: colors.textOnDark,
     fontSize: 46,
     lineHeight: 50,
     letterSpacing: -1.4,
@@ -338,7 +324,7 @@ const styles = StyleSheet.create({
   },
   titleGlow: {
     position: "absolute",
-    color: "rgba(255,255,255,0.92)",
+    color: colors.textOnDark,
     fontSize: 46,
     lineHeight: 50,
     letterSpacing: -1.4,
@@ -358,7 +344,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     marginTop: 12,
-    color: MUTED,
+    color: colors.mutedOnDark,
     fontSize: 14.8,
     lineHeight: 22,
     maxWidth: 420,
@@ -373,59 +359,64 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: colors.white05,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: colors.white10,
   },
   moodEmoji: { fontSize: 14 },
-  moodLabel: { color: "rgba(255,255,255,0.84)", fontSize: 12.5, fontFamily: FONT.semi },
+  moodLabel: { color: colors.white84, fontSize: 12.5, fontFamily: FONT.semi },
 
   mid: { marginTop: 18, flex: 1, justifyContent: "center" },
 
   previewCard: {
     borderRadius: 22,
     padding: 16,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.white06,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: colors.white10,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(0,0,0,0.55)",
-        shadowOpacity: 0.35,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 12 },
+        shadowColor: "rgba(45, 55, 38, 0.18)",
+        shadowOpacity: 1,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 10 },
       },
-      android: { elevation: 10 },
+      android: { elevation: 8 },
     }),
   },
   previewTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
-  previewTitle: { color: "rgba(255,255,255,0.88)", fontSize: 13, fontFamily: FONT.semi },
+  previewTitle: { color: colors.white88, fontSize: 13, fontFamily: FONT.semi },
   previewTag: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, borderWidth: 1 },
   previewTagText: { fontSize: 12, fontFamily: FONT.semi },
 
-  previewPrompt: { color: "rgba(255,255,255,0.70)", fontSize: 12.5, fontFamily: FONT.reg, marginBottom: 10 },
+  previewPrompt: { color: colors.subtleOnDark, fontSize: 12.5, fontFamily: FONT.reg, marginBottom: 10 },
 
   previewNote: { flexDirection: "row", gap: 12, alignItems: "flex-start", paddingVertical: 8 },
   previewBar: { width: 4, height: 44, borderRadius: 999, opacity: 0.9 },
-  previewNoteTitle: { color: "rgba(255,255,255,0.90)", fontSize: 13.5, fontFamily: FONT.semi, letterSpacing: -0.2 },
-  previewNoteBody: { marginTop: 4, color: "rgba(255,255,255,0.58)", fontSize: 12.5, lineHeight: 18, fontFamily: FONT.reg },
+  previewNoteTitle: { color: colors.white90, fontSize: 13.5, fontFamily: FONT.semi, letterSpacing: -0.2 },
+  previewNoteBody: { marginTop: 4, color: colors.white58, fontSize: 12.5, lineHeight: 18, fontFamily: FONT.reg },
 
-  previewDivider: { marginTop: 10, height: 1, backgroundColor: "rgba(255,255,255,0.08)" },
+  previewDivider: { marginTop: 10, height: 1, backgroundColor: colors.white08 },
 
   previewFooter: { marginTop: 12, flexDirection: "row", gap: 10 },
   miniStat: {
     flex: 1,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: colors.white10,
     paddingVertical: 10,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: colors.white05,
   },
-  miniStatTop: { fontSize: 16, fontFamily: FONT.title, letterSpacing: -0.4 },
-  miniStatTop2: { color: "rgba(255,255,255,0.90)", fontSize: 15, fontFamily: FONT.title, letterSpacing: -0.4 },
-  miniStatSub: { marginTop: 2, color: "rgba(255,255,255,0.55)", fontSize: 11.5, fontFamily: FONT.reg },
+  miniStatTop: {
+    fontSize: 16,
+    fontFamily: FONT.title,
+    letterSpacing: -0.4,
+    color: colors.textOnDark,
+  },
+  miniStatTop2: { color: colors.white90, fontSize: 15, fontFamily: FONT.title, letterSpacing: -0.4 },
+  miniStatSub: { marginTop: 2, color: colors.white45, fontSize: 11.5, fontFamily: FONT.reg },
 
   actions: { paddingTop: 10 },
   primaryBtn: {
@@ -433,10 +424,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#42253f", // BG (#9e6e99) ile uyumlu, biraz daha koyu mor
+    backgroundColor: colors.primary,
   },
-  primaryText: { color: "rgba(249,250,251,0.96)", fontSize: 16.5, fontFamily: FONT.title, letterSpacing: -0.2 },
-  primaryHint: { color: "rgba(226,232,240,0.88)", fontSize: 12, marginTop: 4, fontFamily: FONT.reg },
+  primaryText: { color: colors.textOnPrimary, fontSize: 16.5, fontFamily: FONT.title, letterSpacing: -0.2 },
+  primaryHint: { color: colors.hintOnPrimary, fontSize: 12, marginTop: 4, fontFamily: FONT.reg },
 
   secondaryBtn: {
     marginTop: 12,
@@ -447,14 +438,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  secondaryText: { color: TEXT, fontSize: 16.5, fontFamily: FONT.title, letterSpacing: -0.2 },
-  secondaryHint: { color: MUTED, fontSize: 12, marginTop: 4, fontFamily: FONT.reg },
+  secondaryText: { color: colors.textOnDark, fontSize: 16.5, fontFamily: FONT.title, letterSpacing: -0.2 },
+  secondaryHint: { color: colors.mutedOnDark, fontSize: 12, marginTop: 4, fontFamily: FONT.reg },
 
   pressed: { transform: [{ scale: 0.99 }], opacity: 0.92 },
 
   footerNote: {
     marginTop: 12,
-    color: "rgba(255,255,255,0.45)",
+    color: colors.footerOnDark,
     fontSize: 11.5,
     lineHeight: 16,
     textAlign: "center",
