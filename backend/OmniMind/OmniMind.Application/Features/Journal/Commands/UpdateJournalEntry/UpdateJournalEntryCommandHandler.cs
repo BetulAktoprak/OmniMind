@@ -39,6 +39,9 @@ public sealed class UpdateJournalEntryCommandHandler : IRequestHandler<UpdateJou
 
         var blob = await _encryption.EncryptJournalBodyAsync(request.UserId, trimmed, cancellationToken);
         entry.Update(request.Title, request.Mood, blob);
+        if (request.AiInsight != null)
+            entry.SetAiInsight(request.AiInsight.Comment, request.AiInsight.MusicSuggestion);
+
         await _db.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

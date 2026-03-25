@@ -5,9 +5,12 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { colors, fonts as FONT } from "../theme/colors";
 import { MOOD_OPTIONS } from "./moodOptions";
+
+const MIN_CHARS_FOR_INSIGHT = 10;
 
 type Props = {
   title: string;
@@ -17,6 +20,11 @@ type Props = {
   body: string;
   onBodyChange: (b: string) => void;
   error: string | null;
+  onRequestInsight?: () => void;
+  insightLoading?: boolean;
+  insightError?: string | null;
+  insightComment?: string | null;
+  insightMusic?: string | null;
 };
 
 export function JournalFormFields({
@@ -27,7 +35,20 @@ export function JournalFormFields({
   body,
   onBodyChange,
   error,
+  onRequestInsight,
+  insightLoading = false,
+  insightError = null,
+  insightComment = null,
+  insightMusic = null,
 }: Props) {
+  const bodyTrim = body.trim();
+  const canInsight = bodyTrim.length >= MIN_CHARS_FOR_INSIGHT;
+  const showInsightArea =
+    onRequestInsight != null ||
+    Boolean(insightComment) ||
+    Boolean(insightMusic) ||
+    Boolean(insightError);
+
   return (
     <ScrollView
       style={styles.scroll}
@@ -78,6 +99,52 @@ export function JournalFormFields({
           multiline
           textAlignVertical="top"
         />
+
+        {showInsightArea ? (
+          <View style={styles.insightBlock}>
+            {onRequestInsight ? (
+              <>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.insightBtn,
+                    (!canInsight || insightLoading) && styles.insightBtnDisabled,
+                    pressed && canInsight && !insightLoading && styles.pressedInsight,
+                  ]}
+                  onPress={onRequestInsight}
+                  disabled={!canInsight || insightLoading}
+                >
+                  {insightLoading ? (
+                    <ActivityIndicator color={colors.primary} size="small" />
+                  ) : (
+                    <Text style={styles.insightBtnText}>Yorum yap</Text>
+                  )}
+                </Pressable>
+                {!canInsight ? (
+                  <Text style={styles.insightHint}>
+                    Yorum için en az {MIN_CHARS_FOR_INSIGHT} karakter yazın.
+                  </Text>
+                ) : null}
+              </>
+            ) : insightComment || insightMusic ? (
+              <Text style={styles.insightSavedHint}>Kayıtlı yorum</Text>
+            ) : null}
+            {insightError ? (
+              <Text style={styles.insightErr}>{insightError}</Text>
+            ) : null}
+            {insightComment ? (
+              <View style={styles.insightCard}>
+                <Text style={styles.insightLabel}>Yorum</Text>
+                <Text style={styles.insightBody}>{insightComment}</Text>
+              </View>
+            ) : null}
+            {insightMusic ? (
+              <View style={styles.insightCard}>
+                <Text style={styles.insightLabel}>Müzik önerisi</Text>
+                <Text style={styles.insightBody}>{insightMusic}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
@@ -150,5 +217,62 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 13,
     fontFamily: FONT.semi,
+  },
+  insightBlock: { marginTop: 16, gap: 10 },
+  insightSavedHint: {
+    fontSize: 12,
+    fontFamily: FONT.semi,
+    color: colors.mutedOnLight,
+  },
+  insightBtn: {
+    alignSelf: "flex-start",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    backgroundColor: colors.white06,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    minWidth: 120,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  insightBtnDisabled: { opacity: 0.45, borderColor: colors.inputBorder },
+  pressedInsight: { opacity: 0.88 },
+  insightBtnText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontFamily: FONT.semi,
+  },
+  insightHint: {
+    fontSize: 12,
+    fontFamily: FONT.reg,
+    color: colors.mutedOnLight,
+  },
+  insightErr: {
+    fontSize: 13,
+    fontFamily: FONT.semi,
+    color: colors.error,
+  },
+  insightCard: {
+    marginTop: 4,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: "rgba(109, 128, 104, 0.08)",
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+  },
+  insightLabel: {
+    fontSize: 11,
+    fontFamily: FONT.semi,
+    color: colors.labelOnLight,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  insightBody: {
+    fontSize: 14,
+    fontFamily: FONT.reg,
+    color: colors.textOnLight,
+    lineHeight: 21,
   },
 });

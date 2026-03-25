@@ -18,11 +18,9 @@ Bu doküman günlük, yapay zeka analizi, müzik önerisi ve ilgili altyapı iç
 
 ## 2. Mevcut durum (referans)
 
-- **Backend:** .NET 9, `OmniMind.WebApi`, JWT, EF Core + SQL Server, kimlik (`Auth`), **günlük (CQRS + MediatR + AES-GCM şifreleme)** — migration’ı uygulamak için:  
-  `dotnet ef migrations add JournalAndUserContentKeys -p OmniMind.Infrastructure -s OmniMind.WebApi`  
-  ardından `dotnet ef database update -p OmniMind.Infrastructure -s OmniMind.WebApi`  
-  (Komut `backend/OmniMind` klasöründen çalıştırılmalı.) Geliştirme ortamında `appsettings.Development.json` içinde `DataEncryption:MasterKeyBase64` (32 bayt Base64) tanımlı olmalı; üretimde gizli depoda saklayın.
-- **Mobil:** Expo, giriş/kayıt/ana sayfa, ortak tema (`src/theme/colors.ts`).
+- **Backend:** .NET 9, `OmniMind.WebApi`, JWT, EF Core + SQL Server, kimlik (`Auth`), **günlük (CQRS + MediatR)**. İçerik **AES-GCM** ile şifrelenir; kullanıcı başına `UserContentKey` (sunucu ana anahtarı ile sarılmış DEK) ve `JournalEntry.EncryptedContent` kullanılıyor. Günlük silme şu an **yumuşak silme** (`IsDeleted` / `DeletedAt`).
+- **Yeni migration:** `dotnet ef migrations add <Ad> -p OmniMind.Infrastructure -s OmniMind.WebApi` ardından `dotnet ef database update -p OmniMind.Infrastructure -s OmniMind.WebApi` (`backend/OmniMind` içinden). Geliştirmede `appsettings.Development.json` içinde `DataEncryption:MasterKeyBase64` (32 bayt Base64) gerekir; üretimde gizli depoda saklayın.
+- **Mobil:** Expo, giriş/kayıt/ana sayfa, **günlük oluşturma / liste / detay / düzenleme / silme** akışları, ortak tema (`src/theme/colors.ts`). Liste şu an sayfalama ile; **“son 7 gün / tümü”** filtresi henüz yok.
 - **Kayıtta:** Kullanım şartları, gizlilik, AI analizi vb. için onay alanları mevcut (backend ile uyumlu genişletilebilir).
 
 ---
@@ -31,33 +29,37 @@ Bu doküman günlük, yapay zeka analizi, müzik önerisi ve ilgili altyapı iç
 
 ### 3.1 Kullanıcı özellikleri (ürün)
 
-- [ ] Yeni günlük oluşturma (metin, tarih/saat otomatik veya düzenlenebilir).
-- [ ] İsteğe bağlı: o günkü **ruh hali** seçimi (mevcut landing’deki chip mantığı ile uyumlu olabilir).
-- [ ] Günlük listesi (tarihe göre; basit filtre: son 7 gün / tümü).
-- [ ] Günlük detay / düzenleme / silme (silme politikası: yumuşak silme veya kalıcı — karar).
-- [ ] Taslak / çevrimdışı (isteğe bağlı faz 2): yerelde tutup bağlantı gelince senkron.
+- [x] Yeni günlük oluşturma (metin; tarih/saat sunucuda `CreatedAt` — kullanıcı tarafından düzenlenebilir alan henüz yok).
+- [x] İsteğe bağlı **ruh hali** seçimi.
+- [x] Günlük listesi (sayfalama; sıralama/tarih filtresi API tarafında netleştirilebilir).
+- [ ] Liste filtresi: son 7 gün / tümü (ürün kararı + API sorgusu).
+- [x] Günlük detay / düzenleme / silme — silme: **yumuşak silme** (uygulandı).
+- [ ] Taslak / çevrimdışı (faz 2): yerelde tutup bağlantı gelince senkron.
 
 ### 3.2 Veri modeli (taslak)
 
-Sunucuda örnek varlıklar (isimler projeye göre netleştirilir):
+Sunucuda şu an (özet):
 
-- `JournalEntry`: `Id`, `UserId`, `CreatedAt`, `UpdatedAt`, `Mood` (nullable enum veya string), `Title` (opsiyonel), `BodyCipher` veya `Body` + şifreleme katmanı, `EncryptionVersion` (ileride anahtar rotasyonu için).
-- İleride: `JournalAnalysis`: günlük veya dönem bazlı AI çıktısı, model sürümü, oluşturulma zamanı.
+- `JournalEntry`: `UserId`, `Title` (liste önizlemesi, düz metin), `Mood` (string), `EncryptedContent` (AES-GCM blob), `CreatedAt`, `UpdatedAt`, `IsDeleted`, `DeletedAt`.
+- `UserContentKey`: kullanıcıya özel anahtar materyali (sunucu master key ile sarılmış).
+- İleride: `EncryptionVersion` veya anahtar rotasyonu alanları; `JournalAnalysis` (günlük/dönem AI çıktısı, model sürümü, zaman).
 
-### 3.3 Şifreleme (notlar — uygulama öncesi karar)
+### 3.3 Şifreleme (notlar — kısmen uygulandı)
 
-- **Minimum:** TLS, veritabanı/disk şifreleme, günlük içeriğinin loglara düşmemesi.
-- **Hedef:** Uygulama katmanında içerik için **AES-GCM** (veya eşdeğeri); kullanıcı başına veya giriş bazlı anahtar yönetimi; anahtarların KMS/HSM veya güvenli saklama ile korunması.
+- **Minimum:** TLS, veritabanı/disk şifreleme, günlük içeriğinin loglara düşmemesi — operasyonel olarak sürdürülmeli.
+- **Uygulama katmanı:** İçerik için **AES-GCM** + kullanıcı başına anahtar (`UserContentKey`); master key yapılandırmada (üretimde KMS/HSM veya gizli mağaza hedefi §9’da).
 - **E2EE + sunucuda tam analiz** birlikte zor; analiz anında metnin işlendiği senaryoda **açık rıza metni** ve isteğe bağlı “AI analizi kapalı” modu düşünülmeli.
 - Bu dokümanda kilitlemeden önce: “Parola unutulunca kurtarma” ve “Sunucu analiz edebilsin mi?” sorularına net cevap yazılacak.
 
-### 3.4 API (taslak)
+### 3.4 API (gerçek rota şablonu)
 
-- `POST /api/journal/create` — oluştur.
-- `GET /api/journal/list` — sayfalama ile liste.
-- `GET /api/journal/{id}` — detay.
-- `PUT /api/journal/{id}` — güncelle.
-- `DELETE /api/journal/{id}` — sil.
+Denetleyici `api/[controller]/[action]` kullanır; örnekler (ASP.NET varsayılanında büyük/küçük harf duyarsız):
+
+- `POST /api/Journal/Create` — oluştur.
+- `GET /api/Journal/List?page=&pageSize=` — sayfalama ile liste.
+- `GET /api/Journal/GetById?id=` — detay (`id` sorgu parametresi).
+- `PUT /api/Journal/Update?id=` — güncelle.
+- `DELETE /api/Journal/Delete?id=` — sil (yumuşak silme).
 
 Tümü JWT ile kullanıcıya bağlı.
 
@@ -147,9 +149,9 @@ Aşamaları bu sırayla ilerletmek, bağımlılıkları azaltır.
 
 | Sıra | Konu | Çıktı |
 |------|------|--------|
-| 1 | Günlük veri modeli + migration + CRUD API | Kayıtlı günlükler |
-| 2 | Mobil: günlük yazma / liste / detay | Uçtan uca günlük |
-| 3 | Şifreleme kararı dokümante + uygulama (minimum veya hedef seviye) | Güvenlik netliği |
+| 1 | Günlük veri modeli + migration + CRUD API | Kayıtlı günlükler *(yapıldı)* |
+| 2 | Mobil: günlük yazma / liste / detay | Uçtan uca günlük *(yapıldı; isteğe bağlı filtreler açık)* |
+| 3 | Şifreleme kararı dokümante + uygulama | Sunucu tarafı AES-GCM + kullanıcı anahtarı *(uygulandı)*; E2EE / KMS / “sunucu görebilir mi” §9 |
 | 4 | AI: tek “günlük analizi” endpoint + mobil “Analiz et” | İlk AI değeri |
 | 5 | Müzik: küçük katalog + uygulama içi oynatıcı + basit öneri (kural veya AI parametresi) | Tamamlanmış müzik döngüsü |
 | 6 | Haftalık özet | Toplu analiz |
@@ -159,8 +161,8 @@ Aşamaları bu sırayla ilerletmek, bağımlılıkları azaltır.
 
 ## 9. Açık kararlar (takip listesi)
 
-- [ ] Şifreleme: sunucunun içeriği çözebilmesi mi, yoksa daha sıkı E2EE mi?
-- [ ] Günlük silme: kalıcı mı, yumuşak silme + süre mi?
+- [ ] Şifreleme: sunucunun içeriği çözebilmesi (mevcut mimari) ile tam E2EE ve AI analizi uyumu; master key’in üretimde KMS/HSM’e taşınması.
+- [x] Günlük silme: **yumuşak silme** uygulandı; kalıcı silme veya saklama süresi politikası ayrıca netleştirilebilir.
 - [ ] İlk müzik katalogu: kaç parça, dosya nerede host edilecek?
 - [ ] LLM sağlayıcısı: OpenAI / Azure / diğer (maliyet ve veri bölgesi)?
 - [ ] Analiz başına kullanıcı kotası?
@@ -172,4 +174,4 @@ Aşamaları bu sırayla ilerletmek, bağımlılıkları azaltır.
 - Her büyük özellik tamamlandığında ilgili bölüme “Tamamlandı” ve tarih eklenebilir.
 - Mimari değişince §3.3, §4, §5 güncellenmeli.
 
-*Son güncelleme: planlama amaçlı oluşturuldu; uygulama adımları başladıkça revize edin.*
+*Son güncelleme: günlük CRUD + mobil + sunucu şifreleme ile kod tabanı eşitlendi (bakım: §10).*

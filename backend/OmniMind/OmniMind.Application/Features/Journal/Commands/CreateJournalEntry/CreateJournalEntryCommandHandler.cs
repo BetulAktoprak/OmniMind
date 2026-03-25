@@ -31,6 +31,9 @@ public sealed class CreateJournalEntryCommandHandler : IRequestHandler<CreateJou
         var blob = await _encryption.EncryptJournalBodyAsync(request.UserId, trimmed, cancellationToken);
 
         var entry = JournalEntry.Create(request.UserId, request.Title, request.Mood, blob);
+        if (request.AiInsight != null)
+            entry.SetAiInsight(request.AiInsight.Comment, request.AiInsight.MusicSuggestion);
+
         _db.JournalEntries.Add(entry);
         await _db.SaveChangesAsync(cancellationToken);
 

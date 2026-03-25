@@ -3,10 +3,11 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OmniMind.Application.Features.Journal.Commands.AnalyzeJournalDraft;
 using OmniMind.Application.Features.Journal.Commands.CreateJournalEntry;
+using OmniMind.Application.Features.Journal.Dtos;
 using OmniMind.Application.Features.Journal.Commands.DeleteJournalEntry;
 using OmniMind.Application.Features.Journal.Commands.UpdateJournalEntry;
-using OmniMind.Application.Features.Journal.Dtos;
 using OmniMind.Application.Features.Journal.Queries.GetJournalById;
 using OmniMind.Application.Features.Journal.Queries.GetJournalEntries;
 using OmniMind.WebApi.Abstractions;
@@ -25,13 +26,30 @@ public class JournalController : ApiController
     }
 
     [HttpPost]
+    public async Task<ActionResult<AnalyzeJournalDraftResponse>> AnalyzeDraft(
+        [FromBody] AnalyzeJournalDraftRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        var result = await _mediator.Send(
+            new AnalyzeJournalDraftCommand(userId, request.Body, request.Mood),
+            cancellationToken);
+        return Ok(new AnalyzeJournalDraftResponse
+        {
+            Comment = result.Comment,
+            MusicSuggestion = result.MusicSuggestion,
+        });
+    }
+
+    [HttpPost]
     public async Task<ActionResult<CreateJournalResponse>> Create(
         [FromBody] CreateJournalRequest request,
         CancellationToken cancellationToken)
     {
         var userId = GetUserId();
+        var insight = MapInsight(request.Insight);
         var id = await _mediator.Send(
-            new CreateJournalEntryCommand(userId, request.Title, request.Mood, request.Body),
+            new CreateJournalEntryCommand(userId, request.Title, request.Mood, request.Body, insight),
             cancellationToken);
         return Ok(new CreateJournalResponse(id));
     }
@@ -66,8 +84,9 @@ public class JournalController : ApiController
         CancellationToken cancellationToken)
     {
         var userId = GetUserId();
+        var insight = MapInsight(request.Insight);
         await _mediator.Send(
-            new UpdateJournalEntryCommand(userId, id, request.Title, request.Mood, request.Body),
+            new UpdateJournalEntryCommand(userId, id, request.Title, request.Mood, request.Body, insight),
             cancellationToken);
         return Ok();
     }
@@ -79,6 +98,9 @@ public class JournalController : ApiController
         await _mediator.Send(new DeleteJournalEntryCommand(userId, id), cancellationToken);
         return Ok();
     }
+
+    private static JournalInsightInput? MapInsight(JournalInsightPayload? p) =>
+        p is null ? null : new JournalInsightInput(p.Comment, p.MusicSuggestion);
 
     private Guid GetUserId()
     {

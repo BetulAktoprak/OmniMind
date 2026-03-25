@@ -25,6 +25,8 @@ public class ExceptionMiddleware
             var (status, message) = ex switch
             {
                 NotFoundException => (HttpStatusCode.NotFound, ex.Message),
+                RateLimitExceededException => (HttpStatusCode.TooManyRequests, ex.Message),
+                ExternalServiceException => (HttpStatusCode.ServiceUnavailable, ex.Message),
                 ArgumentException => (HttpStatusCode.BadRequest, ex.Message),
                 InvalidOperationException => (HttpStatusCode.BadRequest, ex.Message),
                 _ => (HttpStatusCode.BadRequest, ex.Message)

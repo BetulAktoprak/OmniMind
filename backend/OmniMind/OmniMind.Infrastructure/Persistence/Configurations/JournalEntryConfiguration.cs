@@ -29,6 +29,10 @@ public class JournalEntryConfiguration : IEntityTypeConfiguration<JournalEntry>
         builder.Property(j => j.IsDeleted).IsRequired();
         builder.Property(j => j.DeletedAt);
 
+        builder.Property(j => j.AiComment).HasMaxLength(8000).HasColumnType("nvarchar(max)");
+        builder.Property(j => j.AiMusicSuggestion).HasMaxLength(4000);
+        builder.Property(j => j.AiInsightGeneratedAt);
+
         builder.HasIndex(j => new { j.UserId, j.CreatedAt });
 
         builder.HasOne<User>()

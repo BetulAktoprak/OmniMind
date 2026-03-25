@@ -1,4 +1,5 @@
 using MediatR;
+using OmniMind.Application.Features.Journal.Dtos;
 
 namespace OmniMind.Application.Features.Journal.Commands.UpdateJournalEntry;
 
@@ -7,4 +8,5 @@ public sealed record UpdateJournalEntryCommand(
     Guid JournalId,
     string? Title,
     string? Mood,
-    string Body) : IRequest<Unit>;
+    string Body,
+    JournalInsightInput? AiInsight) : IRequest<Unit>;

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { analyzeJournalDraft } from "../../src/api/journalInsights.api";
 import { createJournal } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
 import { logout } from "../../src/auth/auth.store";
@@ -24,6 +25,31 @@ export default function NewJournalScreen() {
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [insightError, setInsightError] = useState<string | null>(null);
+  const [insightComment, setInsightComment] = useState<string | null>(null);
+  const [insightMusic, setInsightMusic] = useState<string | null>(null);
+
+  async function onInsight() {
+    const t = body.trim();
+    if (t.length < 10 || insightLoading) return;
+    setInsightError(null);
+    setInsightLoading(true);
+    try {
+      const r = await analyzeJournalDraft(t, mood);
+      setInsightComment(r.comment);
+      setInsightMusic(r.musicSuggestion);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        await logout();
+        router.replace("/login");
+        return;
+      }
+      setInsightError(e instanceof Error ? e.message : "Yorum alınamadı.");
+    } finally {
+      setInsightLoading(false);
+    }
+  }
 
   async function onSave() {
     if (!body.trim() || saving) return;
@@ -34,6 +60,10 @@ export default function NewJournalScreen() {
         title: title.trim() || null,
         mood,
         body: body.trim(),
+        insight:
+          insightComment && insightMusic
+            ? { comment: insightComment, musicSuggestion: insightMusic }
+            : undefined,
       });
       router.replace(`/journal/${id}`);
     } catch (e) {
@@ -72,6 +102,11 @@ export default function NewJournalScreen() {
             body={body}
             onBodyChange={setBody}
             error={error}
+            onRequestInsight={onInsight}
+            insightLoading={insightLoading}
+            insightError={insightError}
+            insightComment={insightComment}
+            insightMusic={insightMusic}
           />
         </View>
 

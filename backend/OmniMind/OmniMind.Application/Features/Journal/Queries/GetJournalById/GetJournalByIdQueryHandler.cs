@@ -38,6 +38,9 @@ public sealed class GetJournalByIdQueryHandler : IRequestHandler<GetJournalByIdQ
             entry.Mood,
             body,
             entry.CreatedAt,
-            entry.UpdatedAt);
+            entry.UpdatedAt,
+            entry.AiComment,
+            entry.AiMusicSuggestion,
+            entry.AiInsightGeneratedAt);
     }
 }

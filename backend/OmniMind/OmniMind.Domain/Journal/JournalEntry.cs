@@ -15,6 +15,14 @@ public class JournalEntry : BaseEntity
     public bool IsDeleted { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
+    /// <summary>LLM yorumu (düz metin).</summary>
+    public string? AiComment { get; private set; }
+
+    /// <summary>LLM müzik önerisi (düz metin).</summary>
+    public string? AiMusicSuggestion { get; private set; }
+
+    public DateTime? AiInsightGeneratedAt { get; private set; }
+
     private JournalEntry() { }
 
     public static JournalEntry Create(
@@ -53,6 +61,15 @@ public class JournalEntry : BaseEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void SetAiInsight(string? comment, string? music)
+    {
+        AiComment = NormalizeAi(comment, 8000);
+        AiMusicSuggestion = NormalizeAi(music, 4000);
+        AiInsightGeneratedAt = AiComment != null || AiMusicSuggestion != null
+            ? DateTime.UtcNow
+            : null;
+    }
+
     public void SoftDelete()
     {
         if (IsDeleted) return;
@@ -73,5 +90,12 @@ public class JournalEntry : BaseEntity
         if (string.IsNullOrWhiteSpace(mood)) return null;
         var m = mood.Trim();
         return m.Length > 64 ? m[..64] : m;
+    }
+
+    private static string? NormalizeAi(string? text, int maxLen)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+        var s = text.Trim();
+        return s.Length > maxLen ? s[..maxLen] : s;
     }
 }

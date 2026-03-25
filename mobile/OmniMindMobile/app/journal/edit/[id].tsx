@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
+import { analyzeJournalDraft } from "../../../src/api/journalInsights.api";
 import { getJournal, updateJournal } from "../../../src/api/journal.api";
 import { ApiError } from "../../../src/api/apiError";
 import { getToken, logout } from "../../../src/auth/auth.store";
@@ -29,6 +30,33 @@ export default function EditJournalScreen() {
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [insightError, setInsightError] = useState<string | null>(null);
+  const [insightComment, setInsightComment] = useState<string | null>(null);
+  const [insightMusic, setInsightMusic] = useState<string | null>(null);
+  /** Sunucuda zaten yorum varsa tekrar "Yorum yap" gösterme. */
+  const [hasSavedInsight, setHasSavedInsight] = useState(false);
+
+  async function onInsight() {
+    const t = body.trim();
+    if (t.length < 10 || insightLoading) return;
+    setInsightError(null);
+    setInsightLoading(true);
+    try {
+      const r = await analyzeJournalDraft(t, mood);
+      setInsightComment(r.comment);
+      setInsightMusic(r.musicSuggestion);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        await logout();
+        router.replace("/login");
+        return;
+      }
+      setInsightError(e instanceof Error ? e.message : "Yorum alınamadı.");
+    } finally {
+      setInsightLoading(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!id) {
@@ -48,6 +76,16 @@ export default function EditJournalScreen() {
       setTitle(data.title ?? "");
       setMood(data.mood);
       setBody(data.body);
+      setInsightComment(data.aiComment?.trim() ? data.aiComment : null);
+      setInsightMusic(
+        data.aiMusicSuggestion?.trim() ? data.aiMusicSuggestion : null
+      );
+      setHasSavedInsight(
+        Boolean(
+          (data.aiComment && data.aiComment.trim()) ||
+            (data.aiMusicSuggestion && data.aiMusicSuggestion.trim())
+        )
+      );
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         await logout();
@@ -73,6 +111,10 @@ export default function EditJournalScreen() {
         title: title.trim() || null,
         mood,
         body: body.trim(),
+        insight:
+          !hasSavedInsight && insightComment && insightMusic
+            ? { comment: insightComment, musicSuggestion: insightMusic }
+            : undefined,
       });
       router.replace(`/journal/${id}` as Href);
     } catch (e) {
@@ -124,6 +166,11 @@ export default function EditJournalScreen() {
                 body={body}
                 onBodyChange={setBody}
                 error={formError}
+                onRequestInsight={hasSavedInsight ? undefined : onInsight}
+                insightLoading={insightLoading}
+                insightError={insightError}
+                insightComment={insightComment}
+                insightMusic={insightMusic}
               />
             </View>
             <View style={styles.footer}>

@@ -41,6 +41,7 @@ function normPaged(raw: Record<string, unknown>): PagedJournalList {
 }
 
 function normDetail(raw: Record<string, unknown>): JournalDetail {
+  const genAt = raw.aiInsightGeneratedAt ?? raw.AiInsightGeneratedAt;
   return {
     id: String(raw.id ?? raw.Id ?? ""),
     title: (raw.title ?? raw.Title ?? null) as string | null,
@@ -48,16 +49,27 @@ function normDetail(raw: Record<string, unknown>): JournalDetail {
     body: String(raw.body ?? raw.Body ?? ""),
     createdAt: String(raw.createdAt ?? raw.CreatedAt ?? ""),
     updatedAt: String(raw.updatedAt ?? raw.UpdatedAt ?? ""),
+    aiComment: (raw.aiComment ?? raw.AiComment ?? null) as string | null,
+    aiMusicSuggestion: (raw.aiMusicSuggestion ?? raw.AiMusicSuggestion ?? null) as string | null,
+    aiInsightGeneratedAt:
+      genAt == null || genAt === "" ? null : String(genAt),
   };
 }
 
 export async function createJournal(payload: CreateJournalPayload): Promise<string> {
   try {
-    const { data } = await http.post<Record<string, unknown>>("/api/Journal/Create", {
+    const req: Record<string, unknown> = {
       title: payload.title ?? null,
       mood: payload.mood ?? null,
       body: payload.body,
-    });
+    };
+    if (payload.insight) {
+      req.insight = {
+        comment: payload.insight.comment,
+        musicSuggestion: payload.insight.musicSuggestion,
+      };
+    }
+    const { data } = await http.post<Record<string, unknown>>("/api/Journal/Create", req);
     const id = data.id ?? data.Id;
     if (id == null) throw new ApiError("Sunucu yanıtı geçersiz.");
     return String(id);
@@ -96,15 +108,18 @@ export async function updateJournal(
   payload: CreateJournalPayload
 ): Promise<void> {
   try {
-    await http.put(
-      "/api/Journal/Update",
-      {
-        title: payload.title ?? null,
-        mood: payload.mood ?? null,
-        body: payload.body,
-      },
-      { params: { id } }
-    );
+    const req: Record<string, unknown> = {
+      title: payload.title ?? null,
+      mood: payload.mood ?? null,
+      body: payload.body,
+    };
+    if (payload.insight) {
+      req.insight = {
+        comment: payload.insight.comment,
+        musicSuggestion: payload.insight.musicSuggestion,
+      };
+    }
+    await http.put("/api/Journal/Update", req, { params: { id } });
   } catch (e) {
     rethrow(e);
   }

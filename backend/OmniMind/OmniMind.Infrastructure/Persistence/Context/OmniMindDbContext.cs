@@ -15,6 +15,7 @@ public class OmniMindDbContext : DbContext, IApplicationDbContext
     public DbSet<UserConsent> UserConsents => Set<UserConsent>();
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<UserContentKey> UserContentKeys => Set<UserContentKey>();
+    public DbSet<JournalAiDailyUsage> JournalAiDailyUsages => Set<JournalAiDailyUsage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

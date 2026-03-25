@@ -146,15 +146,23 @@ export default function JournalDetailScreen() {
               </View>
               <View style={styles.divider} />
               <Text style={styles.body}>{entry.body}</Text>
+              {entry.aiComment ? (
+                <>
+                  <View style={styles.divider} />
+                  <Text style={styles.insightSectionLabel}>Yorum</Text>
+                  <Text style={styles.insightBody}>{entry.aiComment}</Text>
+                </>
+              ) : null}
+              {entry.aiMusicSuggestion ? (
+                <>
+                  <View style={styles.divider} />
+                  <Text style={styles.insightSectionLabel}>Müzik önerisi</Text>
+                  <Text style={styles.insightBody}>{entry.aiMusicSuggestion}</Text>
+                </>
+              ) : null}
             </View>
           </ScrollView>
           <View style={styles.actions}>
-            <Pressable
-              style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}
-              onPress={() => router.push(`/journal/edit/${entry.id}`)}
-            >
-              <Text style={styles.secondaryText}>Düzenle</Text>
-            </Pressable>
             <Pressable
               style={({ pressed }) => [
                 styles.dangerBtn,
@@ -253,29 +261,26 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontFamily: FONT.reg,
   },
+  insightSectionLabel: {
+    fontSize: 11,
+    fontFamily: FONT.semi,
+    color: colors.labelOnLight,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  insightBody: {
+    fontSize: 14,
+    lineHeight: 22,
+    fontFamily: FONT.reg,
+    color: colors.textOnLight,
+  },
   actions: {
-    flexDirection: "row",
-    gap: 12,
     paddingHorizontal: 22,
     paddingBottom: 16,
     paddingTop: 8,
   },
-  secondaryBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.white16,
-    alignItems: "center",
-    backgroundColor: colors.white06,
-  },
-  secondaryText: {
-    color: colors.textOnDark,
-    fontSize: 15,
-    fontFamily: FONT.semi,
-  },
   dangerBtn: {
-    flex: 1,
     paddingVertical: 14,
     borderRadius: 18,
     alignItems: "center",

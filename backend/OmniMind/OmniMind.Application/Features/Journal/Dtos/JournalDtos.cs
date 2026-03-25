@@ -13,6 +13,9 @@ public sealed record JournalDetailDto(
     string? Mood,
     string Body,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    string? AiComment,
+    string? AiMusicSuggestion,
+    DateTime? AiInsightGeneratedAt);
 
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);

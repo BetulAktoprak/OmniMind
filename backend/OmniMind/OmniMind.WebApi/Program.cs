@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OmniMind.Application;
+using OmniMind.Application.Features.Journal.Options;
 using OmniMind.Application.Abstractions;
 using OmniMind.Infrastructure;
 using OmniMind.Infrastructure.Persistence.Context;
@@ -26,8 +27,11 @@ builder.Services.AddDbContext<OmniMindDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<OmniMindDbContext>());
 
+builder.Services.Configure<JournalAiRateLimitOptions>(
+    builder.Configuration.GetSection(JournalAiRateLimitOptions.SectionName));
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddCors(opt =>
 {
