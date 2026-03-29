@@ -15,19 +15,34 @@ import { listJournals } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
 import { getToken, logout } from "../../src/auth/auth.store";
 import { colors, fonts as FONT } from "../../src/theme/colors";
+import { MOOD_OPTIONS } from "../../src/journal/moodOptions";
 import type { JournalListItem } from "../../src/types/journal";
 
 const PAGE_SIZE = 50;
 
-function formatTr(iso: string) {
+function formatTrDateTimeLines(iso: string): { dateLine: string; timeLine: string } {
   try {
-    return new Date(iso).toLocaleString("tr-TR", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
+    const d = new Date(iso);
+    return {
+      dateLine: d.toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      timeLine: d.toLocaleTimeString("tr-TR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   } catch {
-    return iso;
+    return { dateLine: iso, timeLine: "" };
   }
+}
+
+function moodEmoji(mood: string | null | undefined): string | null {
+  if (!mood?.trim()) return null;
+  const found = MOOD_OPTIONS.find((m) => m.value === mood);
+  return found?.emoji ?? "✨";
 }
 
 export default function JournalListScreen() {
@@ -86,20 +101,30 @@ export default function JournalListScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>←</Text>
         </Pressable>
-        <Text style={styles.brand}>Günlükler</Text>
-        <View style={{ width: 32 }} />
+        <View style={styles.headerCenter}>
+          <Text style={styles.brand}>Günlükler</Text>
+          <Text style={styles.headerSub}>Düşüncelerini kaydet, sonra oku</Text>
+        </View>
+        <View style={styles.headerSpacer} />
       </View>
 
       <Pressable
         style={({ pressed }) => [styles.newBtn, pressed && styles.pressed]}
         onPress={() => router.push("/journal/new")}
       >
-        <Text style={styles.newBtnText}>+ Yeni günlük</Text>
+        <View style={styles.newBtnIconWrap}>
+          <Text style={styles.newBtnIcon}>+</Text>
+        </View>
+        <View style={styles.newBtnTextCol}>
+          <Text style={styles.newBtnTitle}>Yeni günlük</Text>
+          <Text style={styles.newBtnHint}>Bugün neler yaşadın?</Text>
+        </View>
       </Pressable>
 
       {loading && !refreshing ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingHint}>Günlükler yükleniyor…</Text>
         </View>
       ) : error ? (
         <View style={styles.center}>
@@ -118,37 +143,74 @@ export default function JournalListScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => fetchList("silent")}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
           ListEmptyComponent={
-            <Text style={styles.empty}>
-              Henüz günlük yok. İlk kaydını oluşturmak için yukarıdaki butonu kullan.
-            </Text>
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyEmoji}>📔</Text>
+              <Text style={styles.emptyTitle}>Henüz günlük yok</Text>
+              <Text style={styles.empty}>
+                İlk satırını yazmak için yukarıdaki &quot;Yeni günlük&quot; ile başla.
+              </Text>
+            </View>
           }
           ListHeaderComponent={
             total > 0 ? (
-              <Text style={styles.count}>
-                {total} kayıt
-                {total > PAGE_SIZE ? ` (ilk ${PAGE_SIZE} gösteriliyor)` : ""}
-              </Text>
+              <View style={styles.countPill}>
+                <Text style={styles.countDot}>●</Text>
+                <Text style={styles.count}>
+                  {total} kayıt
+                  {total > PAGE_SIZE ? ` · ilk ${PAGE_SIZE} gösteriliyor` : ""}
+                </Text>
+              </View>
             ) : null
           }
-          renderItem={({ item }) => (
-            <Pressable
-              style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-              onPress={() => router.push(`/journal/${item.id}`)}
-            >
-              <Text style={styles.rowTitle} numberOfLines={1}>
-                {item.title?.trim() || "Başlıksız"}
-              </Text>
-              <View style={styles.rowMeta}>
-                {item.mood ? (
-                  <Text style={styles.rowMood}>{item.mood}</Text>
-                ) : null}
-                <Text style={styles.rowDate}>{formatTr(item.createdAt)}</Text>
-              </View>
-            </Pressable>
-          )}
+          renderItem={({ item }) => {
+            const { dateLine, timeLine } = formatTrDateTimeLines(item.createdAt);
+            return (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.rowPress,
+                  pressed && styles.rowPressed,
+                ]}
+                onPress={() => router.push(`/journal/${item.id}`)}
+              >
+                <View style={styles.rowShadow}>
+                  <View style={styles.rowInnerClip}>
+                    <View style={styles.rowAccent} />
+                    <View style={styles.rowMain}>
+                      <View style={styles.rowTop}>
+                        <Text style={styles.rowTitle} numberOfLines={2}>
+                          {item.title?.trim() || "Başlıksız"}
+                        </Text>
+                        <View style={styles.rowDateCol}>
+                          <Text style={styles.rowDateLine}>{dateLine}</Text>
+                          {timeLine ? (
+                            <Text style={styles.rowTimeLine}>{timeLine}</Text>
+                          ) : null}
+                        </View>
+                      </View>
+                      <View style={styles.rowFooter}>
+                        {item.mood ? (
+                          <View style={styles.moodChip}>
+                            <Text style={styles.moodEmojiText}>
+                              {moodEmoji(item.mood)}
+                            </Text>
+                            <Text style={styles.rowMood}>{item.mood}</Text>
+                          </View>
+                        ) : (
+                          <View style={styles.moodPlaceholder} />
+                        )}
+                        <Text style={styles.chevron}>›</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </Pressable>
+            );
+          }}
         />
       )}
     </SafeAreaView>
@@ -175,10 +237,11 @@ const styles = StyleSheet.create({
   },
   topRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     paddingHorizontal: 22,
     paddingTop: 8,
+    paddingBottom: 4,
   },
   backBtn: {
     width: 36,
@@ -187,30 +250,79 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.white12,
+    marginTop: 2,
   },
   backText: {
     color: colors.textOnDark,
     fontSize: 18,
     fontFamily: FONT.semi,
   },
+  headerCenter: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+  headerSpacer: { width: 36 },
   brand: {
     color: colors.textOnDark,
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: FONT.title,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+  },
+  headerSub: {
+    marginTop: 4,
+    color: colors.mutedOnDark,
+    fontSize: 12,
+    fontFamily: FONT.reg,
+    textAlign: "center",
+    lineHeight: 16,
+    opacity: 0.95,
   },
   newBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
     marginHorizontal: 22,
-    marginTop: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
+    marginTop: 18,
+    marginBottom: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: "rgba(45, 52, 42, 0.12)",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    elevation: 3,
+  },
+  newBtnIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: colors.primary,
     alignItems: "center",
+    justifyContent: "center",
   },
-  newBtnText: {
+  newBtnIcon: {
     color: colors.textOnPrimary,
-    fontSize: 15,
+    fontSize: 26,
+    fontFamily: FONT.title,
+    marginTop: -2,
+  },
+  newBtnTextCol: { flex: 1 },
+  newBtnTitle: {
+    color: colors.textOnLight,
+    fontSize: 16,
     fontFamily: FONT.semi,
+    letterSpacing: -0.2,
+  },
+  newBtnHint: {
+    marginTop: 3,
+    color: colors.mutedOnLight,
+    fontSize: 12.5,
+    fontFamily: FONT.reg,
   },
   pressed: { opacity: 0.92, transform: [{ scale: 0.99 }] },
   center: {
@@ -218,6 +330,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
+  },
+  loadingHint: {
+    marginTop: 14,
+    color: colors.mutedOnDark,
+    fontSize: 13,
+    fontFamily: FONT.reg,
   },
   list: { flex: 1 },
   errorText: {
@@ -229,54 +347,155 @@ const styles = StyleSheet.create({
   retryText: { color: colors.primary, fontFamily: FONT.semi },
   listContent: {
     paddingHorizontal: 22,
-    paddingBottom: 24,
-    paddingTop: 8,
+    paddingBottom: 28,
+    paddingTop: 12,
     flexGrow: 1,
   },
+  countPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: colors.softSlate2,
+    borderWidth: 1,
+    borderColor: "rgba(109, 128, 104, 0.18)",
+    marginBottom: 14,
+  },
+  countDot: {
+    fontSize: 8,
+    color: colors.primary,
+    marginTop: 1,
+  },
   count: {
-    color: colors.mutedOnDark,
+    color: colors.subtleOnDark,
     fontSize: 12,
     fontFamily: FONT.semi,
-    marginBottom: 10,
+    letterSpacing: 0.2,
+  },
+  emptyWrap: {
+    alignItems: "center",
+    paddingTop: 40,
+    paddingHorizontal: 20,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    color: colors.textOnDark,
+    fontSize: 17,
+    fontFamily: FONT.title,
+    letterSpacing: -0.3,
+    marginBottom: 8,
   },
   empty: {
     color: colors.mutedOnDark,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 22,
     fontFamily: FONT.reg,
     textAlign: "center",
-    marginTop: 32,
-    paddingHorizontal: 12,
+    maxWidth: 280,
   },
-  row: {
-    backgroundColor: colors.white06,
-    borderRadius: 16,
+  rowPress: { marginBottom: 12 },
+  rowShadow: {
+    borderRadius: 20,
+    backgroundColor: colors.cardBackground,
     borderWidth: 1,
-    borderColor: colors.white10,
-    padding: 14,
-    marginBottom: 10,
+    borderColor: colors.cardBorder,
+    shadowColor: "rgba(45, 52, 42, 0.1)",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 3,
   },
-  rowPressed: { opacity: 0.9 },
+  rowInnerClip: {
+    flexDirection: "row",
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  rowAccent: {
+    width: 4,
+    alignSelf: "stretch",
+    backgroundColor: colors.primary,
+    opacity: 0.5,
+  },
+  rowMain: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    paddingRight: 10,
+    minWidth: 0,
+  },
+  rowPressed: { opacity: 0.92, transform: [{ scale: 0.995 }] },
+  rowTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   rowTitle: {
-    color: colors.textOnDark,
+    flex: 1,
+    minWidth: 0,
+    color: colors.textOnLight,
     fontSize: 16,
     fontFamily: FONT.semi,
+    lineHeight: 22,
+    paddingRight: 4,
+    letterSpacing: -0.2,
   },
-  rowMeta: {
+  rowDateCol: {
+    alignItems: "flex-end",
+    maxWidth: "40%",
+    flexShrink: 0,
+    paddingTop: 1,
+  },
+  rowDateLine: {
+    color: colors.mutedOnLight,
+    fontSize: 11,
+    fontFamily: FONT.reg,
+    textAlign: "right",
+    lineHeight: 15,
+  },
+  rowTimeLine: {
+    marginTop: 2,
+    color: colors.labelOnLight,
+    fontSize: 12,
+    fontFamily: FONT.semi,
+    textAlign: "right",
+    opacity: 0.9,
+  },
+  rowFooter: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginTop: 6,
-    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 10,
   },
+  moodChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: colors.softSlate2,
+    borderWidth: 1,
+    borderColor: "rgba(109, 128, 104, 0.2)",
+  },
+  moodEmojiText: { fontSize: 13 },
   rowMood: {
     color: colors.primaryPressed,
-    fontSize: 12.5,
+    fontSize: 12,
     fontFamily: FONT.semi,
   },
-  rowDate: {
-    color: colors.mutedOnDark,
-    fontSize: 12,
+  moodPlaceholder: { flex: 1 },
+  chevron: {
+    fontSize: 22,
+    color: colors.white45,
     fontFamily: FONT.reg,
+    marginLeft: 8,
+    marginRight: 2,
   },
 });
