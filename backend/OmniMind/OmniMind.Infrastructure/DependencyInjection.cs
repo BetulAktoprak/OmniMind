@@ -1,10 +1,10 @@
-using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OmniMind.Application.Abstractions;
 using OmniMind.Infrastructure.AI;
 using OmniMind.Infrastructure.Security;
+using System.Net.Http.Headers;
 
 namespace OmniMind.Infrastructure;
 

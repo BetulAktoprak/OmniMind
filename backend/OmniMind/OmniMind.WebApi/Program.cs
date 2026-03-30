@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OmniMind.Application;
-using OmniMind.Application.Features.Journal.Options;
 using OmniMind.Application.Abstractions;
+using OmniMind.Application.Features.Journal.Options;
 using OmniMind.Infrastructure;
 using OmniMind.Infrastructure.Persistence.Context;
+using OmniMind.WebApi;
 using OmniMind.WebApi.Middlewares;
 using OmniMind.WebApi.Services.Auth;
 using System.Text;
@@ -13,7 +14,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// WebApi csproj UserSecretsId — top-level Program yerine açık assembly işaretçisi kullan.
+builder.Configuration.AddUserSecrets<UserSecretsAssemblyMarker>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(opt =>
@@ -45,6 +47,13 @@ var jwtSection = builder.Configuration.GetSection("Jwt");
 var issuer = jwtSection["Issuer"];
 var audience = jwtSection["Audience"];
 var key = jwtSection["Key"];
+if (string.IsNullOrWhiteSpace(key))
+{
+    throw new InvalidOperationException(
+        "Jwt:Key boş. OmniMind.WebApi klasöründe çalıştırın:\n" +
+        "  dotnet user-secrets set \"Jwt:Key\" \"<en az ~32 karakter güçlü bir metin>\"\n" +
+        "Mevcut sırları görmek için: dotnet user-secrets list");
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
