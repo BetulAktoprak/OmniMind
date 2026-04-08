@@ -29,6 +29,7 @@ builder.Services.AddDbContext<OmniMindDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<OmniMindDbContext>());
 
+
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 builder.Services.Configure<JournalAiRateLimitOptions>(
@@ -98,6 +99,13 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OmniMindDbContext>();
+    db.Database.Migrate();
+}
+
 
 app.UseMiddleware<ExceptionMiddleware>();
 
