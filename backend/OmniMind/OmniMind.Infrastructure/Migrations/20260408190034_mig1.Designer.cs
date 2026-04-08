@@ -12,7 +12,7 @@ using OmniMind.Infrastructure.Persistence.Context;
 namespace OmniMind.Infrastructure.Migrations
 {
     [DbContext(typeof(OmniMindDbContext))]
-    [Migration("20260407135010_mig1")]
+    [Migration("20260408190034_mig1")]
     partial class mig1
     {
         /// <inheritdoc />

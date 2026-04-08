@@ -100,12 +100,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-using (var scope = app.Services.CreateScope())
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<OmniMindDbContext>();
     db.Database.Migrate();
 }
-
+catch (Exception ex)
+{
+    Console.WriteLine("Migration error: " + ex.Message);
+}
 
 app.UseMiddleware<ExceptionMiddleware>();
 
