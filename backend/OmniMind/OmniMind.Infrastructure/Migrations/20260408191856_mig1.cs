@@ -65,7 +65,7 @@ namespace OmniMind.Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    AiComment = table.Column<string>(type: "nvarchar(max)", maxLength: 8000, nullable: true),
+                    AiComment = table.Column<string>(type: "character varying(8000)", maxLength: 8000, nullable: true),
                     AiMusicSuggestion = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
                     AiInsightGeneratedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },

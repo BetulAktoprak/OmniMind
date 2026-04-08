@@ -12,7 +12,7 @@ using OmniMind.Infrastructure.Persistence.Context;
 namespace OmniMind.Infrastructure.Migrations
 {
     [DbContext(typeof(OmniMindDbContext))]
-    [Migration("20260408190034_mig1")]
+    [Migration("20260408191856_mig1")]
     partial class mig1
     {
         /// <inheritdoc />
@@ -126,7 +126,7 @@ namespace OmniMind.Infrastructure.Migrations
 
                     b.Property<string>("AiComment")
                         .HasMaxLength(8000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime?>("AiInsightGeneratedAt")
                         .HasColumnType("timestamp with time zone");

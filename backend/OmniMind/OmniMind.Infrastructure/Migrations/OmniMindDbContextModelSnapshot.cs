@@ -123,7 +123,7 @@ namespace OmniMind.Infrastructure.Migrations
 
                     b.Property<string>("AiComment")
                         .HasMaxLength(8000)
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("character varying(8000)");
 
                     b.Property<DateTime?>("AiInsightGeneratedAt")
                         .HasColumnType("timestamp with time zone");
