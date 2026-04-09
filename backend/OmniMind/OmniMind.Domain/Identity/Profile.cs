@@ -6,7 +6,6 @@ public class Profile : BaseEntity
     public string? DisplayName { get; private set; }
     public string? Bio { get; private set; }
     public string? AvatarUrl { get; private set; }
-    public string? Deneme { get; set; }
 
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
