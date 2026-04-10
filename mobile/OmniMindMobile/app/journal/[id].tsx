@@ -18,6 +18,7 @@ import { colors, fonts as FONT } from "../../src/theme/colors";
 import { MOOD_OPTIONS } from "../../src/journal/moodOptions";
 import type { JournalDetail } from "../../src/types/journal";
 import { useRouteId } from "../../src/router/useRouteId";
+import { MusicSuggestionPlayer } from "../../src/journal/MusicSuggestionPlayer";
 
 function formatTrDateTimeLines(iso: string): { dateLine: string; timeLine: string } {
   try {
@@ -207,9 +208,9 @@ export default function JournalDetailScreen() {
                         <Text style={styles.insightEmoji}>🎵</Text>
                         <Text style={styles.insightCardLabel}>Müzik önerisi</Text>
                       </View>
-                      <Text style={styles.insightBody}>
-                        {entry.aiMusicSuggestion}
-                      </Text>
+                      <MusicSuggestionPlayer
+                        trackLabel={entry.aiMusicSuggestion}
+                      />
                     </View>
                   ) : null}
                 </View>

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { colors, fonts as FONT } from "../theme/colors";
 import { MOOD_OPTIONS } from "./moodOptions";
+import { MusicSuggestionPlayer } from "./MusicSuggestionPlayer";
 
 const MIN_CHARS_FOR_INSIGHT = 10;
 
@@ -140,7 +141,7 @@ export function JournalFormFields({
             {insightMusic ? (
               <View style={styles.insightCard}>
                 <Text style={styles.insightLabel}>Müzik önerisi</Text>
-                <Text style={styles.insightBody}>{insightMusic}</Text>
+                <MusicSuggestionPlayer trackLabel={insightMusic} compact />
               </View>
             ) : null}
           </View>
