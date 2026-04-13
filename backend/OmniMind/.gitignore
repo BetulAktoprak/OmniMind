@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# --- ASP.NET: üretim / makineye özel yapılandırma (connection string, API key vb.) ---
+# appsettings.json genelde boş şablon olarak repoda kalır; gerçek sırlar burada tutulmasın.
+**/appsettings.Production.json
+**/appsettings.Staging.json
+**/appsettings.*.local.json
+**/appsettings.Local.json
+**/secrets.json

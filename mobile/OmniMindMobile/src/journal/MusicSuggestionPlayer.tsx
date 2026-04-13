@@ -197,7 +197,7 @@ export function MusicSuggestionPlayer({ trackLabel, compact }: Props) {
             pressed && styles.btnPressedOutline,
           ]}
         >
-          <Text style={styles.btnOutlineText}>Spotify'da aç</Text>
+          <Text style={styles.btnOutlineText}>{"Spotify'da aç"}</Text>
         </Pressable>
 
         <Pressable
@@ -208,7 +208,7 @@ export function MusicSuggestionPlayer({ trackLabel, compact }: Props) {
             pressed && styles.btnPressedOutline,
           ]}
         >
-          <Text style={styles.btnOutlineText}>YouTube'da aç</Text>
+          <Text style={styles.btnOutlineText}>{"YouTube'da aç"}</Text>
         </Pressable>
       </View>
 
@@ -220,7 +220,9 @@ export function MusicSuggestionPlayer({ trackLabel, compact }: Props) {
         </Text>
       ) : (
         <Text style={styles.hint}>
-          Web'de doğrudan önizleme yok; tam dinleme için Spotify veya YouTube araması açılır.
+          {
+            "Web'de doğrudan önizleme yok; tam dinleme için Spotify veya YouTube araması açılır."
+          }
         </Text>
       )}
     </View>

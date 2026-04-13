@@ -39,6 +39,7 @@ public sealed class AnalyzeJournalDraftCommandHandler
         if (text.Length > MaxLength)
             throw new ArgumentException($"Günlük metni en fazla {MaxLength} karakter olabilir.");
 
+        await _db.EnsureUserExistsAsync(request.UserId, cancellationToken);
         await ConsumeDailyQuotaAsync(request.UserId, cancellationToken);
 
         try

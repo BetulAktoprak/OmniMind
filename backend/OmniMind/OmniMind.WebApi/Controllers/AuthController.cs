@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using OmniMind.WebApi.Abstractions;
 using OmniMind.WebApi.Contracts.Auth;
 using OmniMind.WebApi.Services.Auth;
@@ -14,6 +15,7 @@ public class AuthController : ApiController
     }
 
     [HttpPost]
+    [EnableRateLimiting("auth-register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.RegisterAsync(request, cancellationToken);
@@ -21,7 +23,8 @@ public class AuthController : ApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken)
+    [EnableRateLimiting("auth-login")]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
         return Ok(response);

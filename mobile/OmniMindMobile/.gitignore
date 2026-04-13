@@ -30,8 +30,32 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# --- Ortam / API adresleri / olası client sırları ---
+.env
+.env.*
+
+# --- Firebase / push (dosya yoksa zararı yok; oluşturunca commit etme) ---
+google-services.json
+GoogleService-Info.plist
+
+# --- Android imzalama & mağaza (Play’e çıkınca mutlaka dışarıda tut) ---
+*.keystore
+key.properties
+play-creds.json
+play-store-credentials.json
+
+# --- Google / hizmet hesabı anahtarları ---
+*credentials*.json
+*serviceAccount*.json
+
+# npm’de özel registry token’ı varsa (sadece scope/registry metni commit edeceksen bu satırı sil)
+.npmrc
+
+# --- android/ klasörünü repoya alırsan (prebuild sonrası) ---
+android/local.properties
+android/key.properties
+android/app/release/
+android/**/*.keystore
 
 # typescript
 *.tsbuildinfo

@@ -1,0 +1,19 @@
+# OmniMind — repo kökü (tüm alt projeler için ortak)
+
+# Ortam değişkenleri ve sırlar (yanlışlıkla köke koyulursa)
+.env
+.env.*
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editör çöpleri
+.idea/
+*.sublime-*
+
+# Geçici / yedek
+*.log
+*.bak
+*~

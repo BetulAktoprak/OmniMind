@@ -28,6 +28,8 @@ public sealed class CreateJournalEntryCommandHandler : IRequestHandler<CreateJou
         if (trimmed.Length > MaxBodyLength)
             throw new ArgumentException($"Günlük en fazla {MaxBodyLength} karakter olabilir.");
 
+        await _db.EnsureUserExistsAsync(request.UserId, cancellationToken);
+
         var blob = await _encryption.EncryptJournalBodyAsync(request.UserId, trimmed, cancellationToken);
 
         var entry = JournalEntry.Create(request.UserId, request.Title, request.Mood, blob);

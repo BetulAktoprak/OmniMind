@@ -21,6 +21,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
+        const string loginFailedMessage =
+            "Giriş yapılamadı. E-posta/kullanıcı adı veya parola hatalı.";
+
         var login = request.Login.Trim();
         var loginLower = login.ToLowerInvariant();
 
@@ -30,14 +33,14 @@ public class AuthService : IAuthService
             x.Email.Value == loginLower || x.Username.Value == login, cancellationToken);
 
         if (user is null)
-            throw new InvalidOperationException("Kullanıcı bulunamadı.");
+            throw new InvalidOperationException(loginFailedMessage);
 
         if (!user.IsActive)
-            throw new InvalidOperationException("Hesap aktif değil.");
+            throw new InvalidOperationException(loginFailedMessage);
 
         var verify = _hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (verify == PasswordVerificationResult.Failed)
-            throw new InvalidOperationException("Geçersiz parola.");
+            throw new InvalidOperationException(loginFailedMessage);
 
         var (token, expiresAt) = _jwt.CreateToken(user);
 
