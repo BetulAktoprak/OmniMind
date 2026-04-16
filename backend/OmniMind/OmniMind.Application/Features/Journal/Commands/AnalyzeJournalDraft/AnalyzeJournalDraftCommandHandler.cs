@@ -40,6 +40,17 @@ public sealed class AnalyzeJournalDraftCommandHandler
             throw new ArgumentException($"Günlük metni en fazla {MaxLength} karakter olabilir.");
 
         await _db.EnsureUserExistsAsync(request.UserId, cancellationToken);
+
+        var allowAi = await _db.Users
+            .AsNoTracking()
+            .Where(u => u.Id == request.UserId)
+            .Select(u => u.PrivacySettings.AllowAIAnalysis)
+            .FirstAsync(cancellationToken);
+
+        if (!allowAi)
+            throw new InvalidOperationException(
+                "Yapay zeka ile günlük analizi kapalı. Ayarlardan izin verebilirsin.");
+
         await ConsumeDailyQuotaAsync(request.UserId, cancellationToken);
 
         try

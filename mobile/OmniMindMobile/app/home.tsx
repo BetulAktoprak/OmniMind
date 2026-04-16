@@ -10,8 +10,9 @@ import {
 } from "react-native";
 import { BackgroundMesh } from "../components/BackgroundMesh";
 import { CornerFloat3D } from "../components/CornerFloat3D";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { getToken, logout } from "../src/auth/auth.store";
+import { getToken } from "../src/auth/auth.store";
 import {
   fonts as FONT,
   useOmniTheme,
@@ -34,7 +35,7 @@ function createHomeStyles(colors: ThemePalette) {
       paddingTop: 18,
       paddingBottom: 18,
       overflow: "hidden",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
     },
     main: { flexShrink: 0 },
     topBar: {
@@ -42,6 +43,21 @@ function createHomeStyles(colors: ThemePalette) {
       alignItems: "center",
       justifyContent: "space-between",
       gap: 12,
+    },
+    topBarActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    settingsBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.white06,
+      borderWidth: 1,
+      borderColor: colors.white10,
     },
     themeBtn: {
       paddingHorizontal: 10,
@@ -96,21 +112,6 @@ function createHomeStyles(colors: ThemePalette) {
       fontFamily: FONT.reg,
     },
     pressed: { opacity: 0.92, transform: [{ scale: 0.99 }] },
-    logoutBtn: {
-      paddingVertical: 14,
-      borderRadius: 18,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderColor: colors.white16,
-    },
-    logoutText: {
-      color: colors.textOnDark,
-      fontSize: 16,
-      fontFamily: FONT.title,
-      letterSpacing: -0.2,
-    },
   });
 }
 
@@ -148,14 +149,24 @@ export default function Home() {
         <View style={styles.main}>
           <View style={styles.topBar}>
             <Text style={styles.kicker}>OmniMind</Text>
-            <Pressable
-              onPress={toggleMode}
-              accessibilityRole="button"
-              accessibilityLabel={isDark ? "Açık temaya geç" : "Karanlık temaya geç"}
-              style={styles.themeBtn}
-            >
-              <Text style={styles.themeBtnText}>{isDark ? "☀️" : "🌙"}</Text>
-            </Pressable>
+            <View style={styles.topBarActions}>
+              <Pressable
+                onPress={toggleMode}
+                accessibilityRole="button"
+                accessibilityLabel={isDark ? "Açık temaya geç" : "Karanlık temaya geç"}
+                style={styles.themeBtn}
+              >
+                <Text style={styles.themeBtnText}>{isDark ? "☀️" : "🌙"}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => router.push("/settings")}
+                accessibilityRole="button"
+                accessibilityLabel="Ayarlar"
+                style={({ pressed }) => [styles.settingsBtn, pressed && styles.pressed]}
+              >
+                <Ionicons name="menu" size={22} color={colors.textOnDark} />
+              </Pressable>
+            </View>
           </View>
           <Text style={styles.title}>Hoş geldin</Text>
           <Text style={styles.subtitle}>
@@ -170,16 +181,6 @@ export default function Home() {
             <Text style={styles.journalBtnHint}>Kayıtlarını görüntüle veya yeni yaz</Text>
           </Pressable>
         </View>
-
-        <Pressable
-          style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}
-          onPress={async () => {
-            await logout();
-            router.replace("/");
-          }}
-        >
-          <Text style={styles.logoutText}>Çıkış yap</Text>
-        </Pressable>
 
         <CornerFloat3D accent={colors.primary} accent2={colors.accentDot} position="bottom-right" />
       </View>

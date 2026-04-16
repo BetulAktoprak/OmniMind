@@ -10,6 +10,12 @@ public class User : BaseEntity
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    /// <summary>Kullanıcı hesap silmeyi talep ettiğinde (UTC).</summary>
+    public DateTime? AccountDeletionRequestedAtUtc { get; private set; }
+
+    /// <summary>Verilerin kalıcı olarak silineceği an (UTC). Dolana kadar kayıtlar veritabanında kalır.</summary>
+    public DateTime? ScheduledHardDeletionAtUtc { get; private set; }
+
     public string PasswordHash { get; private set; } = default!;
     public DateTime PasswordChangedAt { get; private set; }
 
@@ -60,6 +66,13 @@ public class User : BaseEntity
         _consents.Add(new UserConsent(type, this.Id));
     }
 
+    public void RevokeConsent(ConsentType type)
+    {
+        var existing = _consents.FirstOrDefault(c => c.Type == type);
+        if (existing is not null)
+            _consents.Remove(existing);
+    }
+
     public void SetPasswordHash(string passwordHash)
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
@@ -67,6 +80,26 @@ public class User : BaseEntity
 
         PasswordHash = passwordHash;
         PasswordChangedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Ertelenmiş hesap silme: oturumlar kapanır; veriler <paramref name="gracePeriod"/> sonunda kalıcı silinir.
+    /// </summary>
+    public void RequestScheduledDeletion(TimeSpan gracePeriod)
+    {
+        if (gracePeriod <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(gracePeriod));
+
+        if (!IsActive)
+            throw new InvalidOperationException("Hesap zaten devre dışı.");
+
+        if (ScheduledHardDeletionAtUtc.HasValue)
+            throw new InvalidOperationException("Hesap silme talebi zaten işleniyor.");
+
+        var now = DateTime.UtcNow;
+        AccountDeletionRequestedAtUtc = now;
+        ScheduledHardDeletionAtUtc = now.Add(gracePeriod);
+        IsActive = false;
     }
 
 }

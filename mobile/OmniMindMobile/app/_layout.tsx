@@ -27,6 +27,8 @@ export default function Layout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="account/delete" />
       <Stack.Screen name="journal" options={{ headerShown: false }} />
     </Stack>
       </ThemeProvider>

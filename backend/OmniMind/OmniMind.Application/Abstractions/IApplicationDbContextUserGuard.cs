@@ -10,7 +10,7 @@ public static class IApplicationDbContextUserGuard
         Guid userId,
         CancellationToken cancellationToken)
     {
-        if (!await db.Users.AnyAsync(u => u.Id == userId, cancellationToken))
+        if (!await db.Users.AnyAsync(u => u.Id == userId && u.IsActive, cancellationToken))
         {
             throw new UnauthorizedSessionException(
                 "Oturumunuz geçersiz veya hesabınız bu sunucuda bulunamadı. Lütfen çıkış yapıp tekrar giriş yapın.");

@@ -10,7 +10,9 @@ using OmniMind.Application.Features.Journal.Options;
 using OmniMind.Infrastructure;
 using OmniMind.Infrastructure.Persistence.Context;
 using OmniMind.WebApi;
+using OmniMind.WebApi.Background;
 using OmniMind.WebApi.Middlewares;
+using OmniMind.WebApi.Options;
 using OmniMind.WebApi.Services.Auth;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -43,6 +45,9 @@ else
 
 builder.Services.Configure<JournalAiRateLimitOptions>(
     builder.Configuration.GetSection(JournalAiRateLimitOptions.SectionName));
+
+builder.Services.Configure<AccountDeletionOptions>(
+    builder.Configuration.GetSection(AccountDeletionOptions.SectionName));
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -106,6 +111,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddPolicy("auth-login", ctx => AuthFixedWindow(ctx, "login"));
     options.AddPolicy("auth-register", ctx => AuthFixedWindow(ctx, "register"));
+    options.AddPolicy("account-delete", ctx => AuthFixedWindow(ctx, "account-delete"));
 });
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -145,6 +151,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddHostedService<AccountHardDeletionWorker>();
 
 var app = builder.Build();
 
@@ -183,6 +190,7 @@ app.UseCors("omnimind");
 app.UseRateLimiter();
 
 app.UseAuthentication();
+app.UseMiddleware<RequireActiveUserMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

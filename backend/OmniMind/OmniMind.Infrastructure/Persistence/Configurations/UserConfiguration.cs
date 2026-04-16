@@ -24,6 +24,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordChangedAt)
             .IsRequired();
 
+        builder.Property(u => u.AccountDeletionRequestedAtUtc);
+        builder.Property(u => u.ScheduledHardDeletionAtUtc);
+
+        builder.HasIndex(u => u.ScheduledHardDeletionAtUtc);
+
         // Email (ValueObject) -> Owned -> Users tablosunda Email kolonu
         builder.OwnsOne(u => u.Email, email =>
         {
