@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -14,7 +14,13 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { listJournals } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
 import { getToken, logout } from "../../src/auth/auth.store";
-import { colors, fonts as FONT } from "../../src/theme/colors";
+import { BackgroundMesh } from "../../components/BackgroundMesh";
+import { CornerFloat3D } from "../../components/CornerFloat3D";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../../src/theme/colors";
 import { MOOD_OPTIONS } from "../../src/journal/moodOptions";
 import type { JournalListItem } from "../../src/types/journal";
 
@@ -47,6 +53,8 @@ function moodEmoji(mood: string | null | undefined): string | null {
 
 export default function JournalListScreen() {
   const router = useRouter();
+  const { colors, isDark, toggleMode } = useOmniTheme();
+  const styles = useMemo(() => createJournalListStyles(colors), [colors]);
   const [items, setItems] = useState<JournalListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -93,9 +101,8 @@ export default function JournalListScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.blob} />
-      <View style={[styles.blob, styles.blob2]} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />
 
       <View style={styles.topRow}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -105,7 +112,14 @@ export default function JournalListScreen() {
           <Text style={styles.brand}>Günlükler</Text>
           <Text style={styles.headerSub}>Düşüncelerini kaydet, sonra oku</Text>
         </View>
-        <View style={styles.headerSpacer} />
+        <Pressable
+          onPress={toggleMode}
+          accessibilityRole="button"
+          accessibilityLabel={isDark ? "Açık temaya geç" : "Karanlık temaya geç"}
+          style={styles.themeBtn}
+        >
+          <Text style={styles.themeBtnText}>{isDark ? "☀️" : "🌙"}</Text>
+        </Pressable>
       </View>
 
       <Pressable
@@ -123,7 +137,7 @@ export default function JournalListScreen() {
 
       {loading && !refreshing ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.spark} />
           <Text style={styles.loadingHint}>Günlükler yükleniyor…</Text>
         </View>
       ) : error ? (
@@ -213,28 +227,15 @@ export default function JournalListScreen() {
           }}
         />
       )}
+
+      <CornerFloat3D accent={colors.primary} accent2={colors.accentDot} position="bottom-right" />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+function createJournalListStyles(colors: ThemePalette) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  blob: {
-    position: "absolute",
-    width: 320,
-    height: 320,
-    borderRadius: 320,
-    backgroundColor: colors.blobTint,
-    top: -140,
-    right: -120,
-  },
-  blob2: {
-    top: undefined,
-    right: undefined,
-    bottom: -180,
-    left: -140,
-    backgroundColor: colors.blobTint2,
-  },
   topRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -262,7 +263,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 8,
   },
-  headerSpacer: { width: 36 },
+  themeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.white12,
+    marginTop: 2,
+  },
+  themeBtnText: { fontSize: 15 },
   brand: {
     color: colors.textOnDark,
     fontSize: 18,
@@ -482,7 +492,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: colors.softSlate2,
     borderWidth: 1,
-    borderColor: "rgba(109, 128, 104, 0.2)",
+    borderColor: colors.cardBorder,
   },
   moodEmojiText: { fontSize: 13 },
   rowMood: {
@@ -493,9 +503,10 @@ const styles = StyleSheet.create({
   moodPlaceholder: { flex: 1 },
   chevron: {
     fontSize: 22,
-    color: colors.white45,
+    color: colors.mutedOnLight,
     fontFamily: FONT.reg,
     marginLeft: 8,
     marginRight: 2,
   },
 });
+}

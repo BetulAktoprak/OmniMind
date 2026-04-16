@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -16,10 +16,72 @@ import { createJournal } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
 import { logout } from "../../src/auth/auth.store";
 import { JournalFormFields } from "../../src/journal/JournalFormFields";
-import { colors, fonts as FONT } from "../../src/theme/colors";
+import { CornerFloat3D } from "../../components/CornerFloat3D";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../../src/theme/colors";
+
+function createNewJournalStyles(colors: ThemePalette) {
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.background },
+    flex: { flex: 1 },
+    topRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 22,
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    backBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.white12,
+    },
+    backText: {
+      color: colors.textOnDark,
+      fontSize: 18,
+      fontFamily: FONT.semi,
+    },
+    title: {
+      color: colors.textOnDark,
+      fontSize: 17,
+      fontFamily: FONT.title,
+      letterSpacing: -0.3,
+    },
+    formWrap: { flex: 1, paddingHorizontal: 22, marginTop: 8 },
+    footer: {
+      paddingHorizontal: 22,
+      paddingBottom: 16,
+      paddingTop: 8,
+    },
+    saveBtn: {
+      paddingVertical: 14,
+      borderRadius: 18,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: 50,
+    },
+    saveDisabled: { opacity: 0.55 },
+    saveText: {
+      color: colors.textOnPrimary,
+      fontSize: 16,
+      fontFamily: FONT.title,
+    },
+    pressed: { opacity: 0.92 },
+  });
+}
 
 export default function NewJournalScreen() {
   const router = useRouter();
+  const { colors, isDark } = useOmniTheme();
+  const styles = useMemo(() => createNewJournalStyles(colors), [colors]);
   const [title, setTitle] = useState("");
   const [mood, setMood] = useState<string | null>(null);
   const [body, setBody] = useState("");
@@ -80,7 +142,7 @@ export default function NewJournalScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -128,59 +190,8 @@ export default function NewJournalScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      <CornerFloat3D accent={colors.primary} accent2={colors.accentDot} position="bottom-right" />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white12,
-  },
-  backText: {
-    color: colors.textOnDark,
-    fontSize: 18,
-    fontFamily: FONT.semi,
-  },
-  title: {
-    color: colors.textOnDark,
-    fontSize: 17,
-    fontFamily: FONT.title,
-    letterSpacing: -0.3,
-  },
-  formWrap: { flex: 1, paddingHorizontal: 22, marginTop: 8 },
-  footer: {
-    paddingHorizontal: 22,
-    paddingBottom: 16,
-    paddingTop: 8,
-  },
-  saveBtn: {
-    paddingVertical: 14,
-    borderRadius: 18,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 50,
-  },
-  saveDisabled: { opacity: 0.55 },
-  saveText: {
-    color: colors.textOnPrimary,
-    fontSize: 16,
-    fontFamily: FONT.title,
-  },
-  pressed: { opacity: 0.92 },
-});

@@ -5,38 +5,45 @@ import {
   Easing,
   Platform,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BackgroundMesh } from "../components/BackgroundMesh";
 import { getToken } from "../src/auth/auth.store";
-import { colors, fonts as FONT } from "../src/theme/colors";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../src/theme/colors";
 
 type MoodKey = "calm" | "focused" | "happy" | "tired" | "anxious";
 
-const MOODS: Record<
-  MoodKey,
-  { label: string; emoji: string; accent: string; accent2: string }
-> = {
-  calm: { label: "Sakin", emoji: "🌿", accent: "#7f9b78", accent2: "#c8d6c2" },
-  focused: { label: "Odak", emoji: "🎯", accent: "#6d8f86", accent2: "#b5cec6" },
-  happy: { label: "İyi", emoji: "☀️", accent: "#b89a6e", accent2: "#e5d4bc" },
-  tired: { label: "Yorgun", emoji: "🌙", accent: "#8f968a", accent2: "#cfd4c8" },
-  anxious: { label: "Stresli", emoji: "⚡", accent: "#a67b76", accent2: "#dcc9c6" },
-};
+function buildMoods(icon: ThemePalette["icon"]) {
+  return {
+    calm: { label: "Sakin", emoji: "🌿", accent: "#5c7cba", accent2: "#e4eaf7" },
+    focused: { label: "Odak", emoji: "🎯", accent: icon.navy, accent2: "#d6e0f4" },
+    happy: { label: "İyi", emoji: "☀️", accent: icon.yellowBright, accent2: "#fff9e6" },
+    tired: { label: "Yorgun", emoji: "🌙", accent: "#6b7280", accent2: "#e5e7eb" },
+    anxious: { label: "Stresli", emoji: "⚡", accent: "#c45c3c", accent2: "#fde8e4" },
+  } satisfies Record<
+    MoodKey,
+    { label: string; emoji: string; accent: string; accent2: string }
+  >;
+}
 
 export default function Landing() {
   const router = useRouter();
+  const { colors, isDark, toggleMode } = useOmniTheme();
+  const moods = useMemo(() => buildMoods(colors.icon), [colors]);
+  const styles = useMemo(() => createLandingStyles(colors), [colors]);
 
   const [mood, setMood] = useState<MoodKey>("calm");
 
   // Soft floating animation for preview card
   const float = useRef(new Animated.Value(0)).current;
-
-  // Background accent shift (subtle)
-  const accentShift = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
@@ -63,33 +70,14 @@ export default function Landing() {
       ])
     );
 
-    const shiftLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(accentShift, {
-          toValue: 1,
-          duration: 7000,
-          easing: Easing.linear,
-          useNativeDriver: false, // backgroundColor
-        }),
-        Animated.timing(accentShift, {
-          toValue: 0,
-          duration: 7000,
-          easing: Easing.linear,
-          useNativeDriver: false,
-        }),
-      ])
-    );
-
     floatLoop.start();
-    shiftLoop.start();
 
     return () => {
       floatLoop.stop();
-      shiftLoop.stop();
     };
-  }, [router, float, accentShift]);
+  }, [router, float]);
 
-  const { accent, accent2 } = MOODS[mood];
+  const { accent, accent2 } = moods[mood];
 
   const previewFloatStyle = useMemo(
     () => ({
@@ -102,33 +90,11 @@ export default function Landing() {
     [float]
   );
 
-  // Subtle animated blob color based on mood
-  const blobStyle = useMemo(
-    () => ({
-      backgroundColor: accentShift.interpolate({
-        inputRange: [0, 1],
-        outputRange: [accent, accent2],
-      }),
-      opacity: 0.12,
-    }),
-    [accentShift, accent, accent2]
-  );
-
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.container}>
-        {/* Background: minimal, mood-based accents */}
-        <Animated.View pointerEvents="none" style={[styles.blob, styles.blob1, blobStyle]} />
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.blob,
-            styles.blob2,
-            { backgroundColor: accent, opacity: 0.08 },
-          ]}
-        />
-        <View pointerEvents="none" style={styles.darkOverlay} />
+        <BackgroundMesh accent={accent} accent2={accent2} />
 
         {/* Brand row */}
         <View style={styles.topRow}>
@@ -140,9 +106,17 @@ export default function Landing() {
           <View style={{ flex: 1 }} />
           <View style={[styles.moodPill, { borderColor: colors.white10 }]}>
             <Text style={styles.moodPillText}>
-              {MOODS[mood].emoji} {MOODS[mood].label}
+              {moods[mood].emoji} {moods[mood].label}
             </Text>
           </View>
+          <Pressable
+            onPress={toggleMode}
+            accessibilityRole="button"
+            accessibilityLabel={isDark ? "Açık temaya geç" : "Karanlık temaya geç"}
+            style={[styles.themeBtn, { borderColor: colors.white10 }]}
+          >
+            <Text style={styles.themeBtnText}>{isDark ? "☀️" : "🌙"}</Text>
+          </Pressable>
         </View>
 
         {/* Hero */}
@@ -161,9 +135,9 @@ export default function Landing() {
 
           {/* Mood selector chips */}
           <View style={styles.moodsRow}>
-            {(Object.keys(MOODS) as MoodKey[]).map((k) => {
+            {(Object.keys(moods) as MoodKey[]).map((k) => {
               const active = k === mood;
-              const m = MOODS[k];
+              const m = moods[k];
               return (
                 <Pressable
                   key={k}
@@ -191,7 +165,7 @@ export default function Landing() {
               <Text style={styles.previewTitle}>Bugünün Kaydı</Text>
               <View style={[styles.previewTag, { borderColor: `${accent}66`, backgroundColor: `${accent}18` }]}>
                 <Text style={[styles.previewTagText, { color: colors.white90 }]}>
-                  {MOODS[mood].emoji} {MOODS[mood].label}
+                  {moods[mood].emoji} {moods[mood].label}
                 </Text>
               </View>
             </View>
@@ -245,7 +219,8 @@ export default function Landing() {
   );
 }
 
-const styles = StyleSheet.create({
+function createLandingStyles(colors: ThemePalette) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   container: {
     flex: 1,
@@ -254,19 +229,6 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 18,
     overflow: "hidden",
-  },
-
-  blob: {
-    position: "absolute",
-    width: 420,
-    height: 420,
-    borderRadius: 420,
-  },
-  blob1: { top: -240, left: -180 },
-  blob2: { bottom: -260, right: -200 },
-  darkOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "transparent",
   },
 
   topRow: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -296,9 +258,18 @@ const styles = StyleSheet.create({
   },
   moodPillText: { color: colors.white80, fontSize: 12, fontFamily: FONT.semi },
 
+  themeBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: colors.white06,
+    borderWidth: 1,
+  },
+  themeBtnText: { fontSize: 15 },
+
   hero: { marginTop: 25 },
   kicker: {
-    color: colors.subtleOnDark,
+    color: colors.spark,
     fontSize: 12.5,
     letterSpacing: 0.8,
     textTransform: "uppercase",
@@ -376,7 +347,7 @@ const styles = StyleSheet.create({
     borderColor: colors.white10,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(45, 55, 38, 0.18)",
+        shadowColor: "rgba(0, 0, 0, 0.35)",
         shadowOpacity: 1,
         shadowRadius: 16,
         shadowOffset: { width: 0, height: 10 },
@@ -452,3 +423,4 @@ const styles = StyleSheet.create({
     fontFamily: FONT.reg,
   },
 });
+}

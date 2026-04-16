@@ -14,7 +14,12 @@ import { useRouter } from "expo-router";
 import { deleteJournal, getJournal } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
 import { getToken, logout } from "../../src/auth/auth.store";
-import { colors, fonts as FONT } from "../../src/theme/colors";
+import { CornerFloat3D } from "../../components/CornerFloat3D";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../../src/theme/colors";
 import { MOOD_OPTIONS } from "../../src/journal/moodOptions";
 import type { JournalDetail } from "../../src/types/journal";
 import { useRouteId } from "../../src/router/useRouteId";
@@ -48,6 +53,8 @@ function moodEmoji(mood: string | null | undefined): string | null {
 export default function JournalDetailScreen() {
   const id = useRouteId("id");
   const router = useRouter();
+  const { colors, isDark } = useOmniTheme();
+  const styles = useMemo(() => createJournalDetailStyles(colors), [colors]);
   const [entry, setEntry] = useState<JournalDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +141,7 @@ export default function JournalDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.topRow}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>←</Text>
@@ -145,7 +152,7 @@ export default function JournalDetailScreen() {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={colors.spark} />
         </View>
       ) : error ? (
         <View style={styles.center}>
@@ -235,11 +242,14 @@ export default function JournalDetailScreen() {
           </View>
         </>
       ) : null}
+
+      <CornerFloat3D accent={colors.primary} accent2={colors.accentDot} position="bottom-right" />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+function createJournalDetailStyles(colors: ThemePalette) {
+  return StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   topRow: {
     flexDirection: "row",
@@ -462,3 +472,4 @@ const styles = StyleSheet.create({
   saveDisabled: { opacity: 0.6 },
   pressed: { opacity: 0.88 },
 });
+}

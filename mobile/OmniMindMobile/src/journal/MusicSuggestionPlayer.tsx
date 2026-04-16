@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,65 @@ import {
   InterruptionModeIOS,
   type AVPlaybackStatus,
 } from "expo-av";
-import { colors, fonts as FONT } from "../theme/colors";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../theme/colors";
+
+function createMusicPlayerStyles(colors: ThemePalette) {
+  return StyleSheet.create({
+    wrap: { gap: 10 },
+    wrapCompact: { marginTop: 4 },
+    trackTitle: {
+      color: colors.textOnLight,
+      fontFamily: FONT.semi,
+      fontSize: 15,
+      lineHeight: 21,
+    },
+    row: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      alignItems: "center",
+    },
+    btn: {
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 12,
+      minWidth: 118,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    btnPreview: {
+      backgroundColor: colors.primary,
+    },
+    btnPreviewText: {
+      color: colors.textOnPrimary,
+      fontFamily: FONT.semi,
+      fontSize: 13,
+    },
+    btnOutline: {
+      backgroundColor: colors.softSlate,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+    },
+    btnOutlineText: {
+      color: colors.textOnLight,
+      fontFamily: FONT.semi,
+      fontSize: 13,
+    },
+    btnDisabled: { opacity: 0.45 },
+    btnPressed: { opacity: 0.88 },
+    btnPressedOutline: { opacity: 0.92 },
+    hint: {
+      color: colors.mutedOnLight,
+      fontFamily: FONT.reg,
+      fontSize: 11.5,
+      lineHeight: 16,
+    },
+  });
+}
 import { fetchItunesPreviewUrl } from "./fetchItunesPreviewUrl";
 
 type UiState =
@@ -43,6 +101,8 @@ function youtubeSearchUrl(query: string): string {
 }
 
 export function MusicSuggestionPlayer({ trackLabel, compact }: Props) {
+  const { colors } = useOmniTheme();
+  const styles = useMemo(() => createMusicPlayerStyles(colors), [colors]);
   const [ui, setUi] = useState<UiState>("idle");
   const soundRef = useRef<Audio.Sound | null>(null);
   const unloadAndIdleRef = useRef<() => Promise<void>>(async () => {});
@@ -229,54 +289,3 @@ export function MusicSuggestionPlayer({ trackLabel, compact }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { gap: 10 },
-  wrapCompact: { marginTop: 4 },
-  trackTitle: {
-    color: colors.textOnLight,
-    fontFamily: FONT.semi,
-    fontSize: 15,
-    lineHeight: 21,
-  },
-  row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    alignItems: "center",
-  },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    minWidth: 118,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  btnPreview: {
-    backgroundColor: colors.primary,
-  },
-  btnPreviewText: {
-    color: colors.textOnPrimary,
-    fontFamily: FONT.semi,
-    fontSize: 13,
-  },
-  btnOutline: {
-    backgroundColor: colors.softSlate,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-  },
-  btnOutlineText: {
-    color: colors.textOnLight,
-    fontFamily: FONT.semi,
-    fontSize: 13,
-  },
-  btnDisabled: { opacity: 0.45 },
-  btnPressed: { opacity: 0.88 },
-  btnPressedOutline: { opacity: 0.92 },
-  hint: {
-    color: colors.mutedOnLight,
-    fontFamily: FONT.reg,
-    fontSize: 11.5,
-    lineHeight: 16,
-  },
-});

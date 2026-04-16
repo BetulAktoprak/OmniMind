@@ -1,22 +1,189 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BackgroundMesh } from "../components/BackgroundMesh";
 import { useRouter } from "expo-router";
 import { loginApi } from "../src/api/auth.api";
 import { saveAuth } from "../src/auth/auth.store";
-import { colors, fonts as FONT } from "../src/theme/colors";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../src/theme/colors";
+
+function createLoginStyles(colors: ThemePalette) {
+  return StyleSheet.create({
+    flex: { flex: 1 },
+    safe: { flex: 1, backgroundColor: colors.background },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: 22,
+      paddingTop: 18,
+      paddingBottom: 18,
+      overflow: "hidden",
+    },
+    topRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      zIndex: 2,
+      ...Platform.select({ android: { elevation: 6 } }),
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.white12,
+      borderWidth: 1,
+      borderColor: colors.white10,
+    },
+    backText: {
+      color: colors.textOnDark,
+      fontSize: 16,
+      fontFamily: FONT.semi,
+    },
+    brand: {
+      color: colors.textOnDark,
+      fontSize: 15,
+      letterSpacing: 0.4,
+      fontFamily: FONT.semi,
+    },
+    hero: {
+      marginTop: 26,
+    },
+    kicker: {
+      color: colors.mutedOnDark,
+      fontSize: 12.5,
+      letterSpacing: 0.6,
+      textTransform: "uppercase",
+      fontFamily: FONT.semi,
+    },
+    title: {
+      marginTop: 8,
+      color: colors.textOnDark,
+      fontSize: 32,
+      lineHeight: 34,
+      letterSpacing: -0.6,
+      fontFamily: FONT.title,
+    },
+    subtitle: {
+      marginTop: 10,
+      color: colors.mutedOnDark,
+      fontSize: 14.2,
+      lineHeight: 21,
+      fontFamily: FONT.reg,
+      maxWidth: 420,
+    },
+    card: {
+      marginTop: 26,
+      borderRadius: 22,
+      padding: 18,
+      backgroundColor: colors.cardBackground,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14,
+    },
+    logoDot: {
+      width: 16,
+      height: 16,
+      borderRadius: 999,
+      backgroundColor: colors.accentDot,
+    },
+    cardTitle: {
+      color: colors.labelOnLight,
+      fontSize: 14,
+      fontFamily: FONT.semi,
+    },
+    field: {
+      marginTop: 10,
+    },
+    label: {
+      color: colors.labelOnLight,
+      fontSize: 12.5,
+      marginBottom: 6,
+      fontFamily: FONT.semi,
+    },
+    input: {
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      backgroundColor: colors.inputBackground,
+      color: colors.textOnLight,
+      fontFamily: FONT.reg,
+      fontSize: 14,
+    },
+    error: {
+      marginTop: 10,
+      color: colors.error,
+      fontSize: 12.5,
+      fontFamily: FONT.semi,
+    },
+    primaryBtn: {
+      marginTop: 18,
+      paddingVertical: 14,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.primary,
+    },
+    primaryDisabled: {
+      opacity: 0.6,
+    },
+    primaryText: {
+      color: colors.textOnPrimary,
+      fontSize: 16,
+      fontFamily: FONT.title,
+      letterSpacing: -0.2,
+    },
+    secondaryBtn: {
+      marginTop: 14,
+      alignItems: "center",
+    },
+    secondaryText: {
+      color: colors.textOnDark,
+      fontSize: 13.5,
+      fontFamily: FONT.semi,
+    },
+    secondaryHint: {
+      marginTop: 2,
+      color: colors.mutedOnDark,
+      fontSize: 12,
+      fontFamily: FONT.reg,
+    },
+    footerNote: {
+      marginTop: 20,
+      color: colors.footerOnDark,
+      fontSize: 11.5,
+      lineHeight: 16,
+      textAlign: "center",
+      fontFamily: FONT.reg,
+    },
+  });
+}
 
 export default function Login() {
   const router = useRouter();
+  const { colors, isDark } = useOmniTheme();
+  const styles = useMemo(() => createLoginStyles(colors), [colors]);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -39,20 +206,19 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={styles.container}>
-          <View style={styles.blob} />
-          <View style={[styles.blob, styles.blob2]} />
-          <View style={styles.darkOverlay} />
+          <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />
 
           <View style={styles.topRow}>
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
               style={styles.backBtn}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
               <Text style={styles.backText}>←</Text>
             </TouchableOpacity>
@@ -131,176 +297,3 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  safe: { flex: 1, backgroundColor: colors.background },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 18,
-    overflow: "hidden",
-  },
-  blob: {
-    position: "absolute",
-    width: 420,
-    height: 420,
-    borderRadius: 420,
-    backgroundColor: colors.blobTint,
-    top: -260,
-    left: -200,
-  },
-  blob2: {
-    top: undefined,
-    left: undefined,
-    right: -220,
-    bottom: -260,
-    backgroundColor: colors.blobTint2,
-  },
-  darkOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "transparent",
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  backBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white12,
-  },
-  backText: {
-    color: colors.textOnDark,
-    fontSize: 16,
-    fontFamily: FONT.semi,
-  },
-  brand: {
-    color: colors.textOnDark,
-    fontSize: 15,
-    letterSpacing: 0.4,
-    fontFamily: FONT.semi,
-  },
-  hero: {
-    marginTop: 26,
-  },
-  kicker: {
-    color: colors.mutedOnDark,
-    fontSize: 12.5,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-    fontFamily: FONT.semi,
-  },
-  title: {
-    marginTop: 8,
-    color: colors.textOnDark,
-    fontSize: 32,
-    lineHeight: 34,
-    letterSpacing: -0.6,
-    fontFamily: FONT.title,
-  },
-  subtitle: {
-    marginTop: 10,
-    color: colors.mutedOnDark,
-    fontSize: 14.2,
-    lineHeight: 21,
-    fontFamily: FONT.reg,
-    maxWidth: 420,
-  },
-  card: {
-    marginTop: 26,
-    borderRadius: 22,
-    padding: 18,
-    backgroundColor: colors.cardBackground,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 14,
-  },
-  logoDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 999,
-    backgroundColor: colors.accentDot,
-  },
-  cardTitle: {
-    color: colors.labelOnLight,
-    fontSize: 14,
-    fontFamily: FONT.semi,
-  },
-  field: {
-    marginTop: 10,
-  },
-  label: {
-    color: colors.labelOnLight,
-    fontSize: 12.5,
-    marginBottom: 6,
-    fontFamily: FONT.semi,
-  },
-  input: {
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    backgroundColor: colors.inputBackground,
-    color: colors.textOnLight,
-    fontFamily: FONT.reg,
-    fontSize: 14,
-  },
-  error: {
-    marginTop: 10,
-    color: colors.error,
-    fontSize: 12.5,
-    fontFamily: FONT.semi,
-  },
-  primaryBtn: {
-    marginTop: 18,
-    paddingVertical: 14,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primary,
-  },
-  primaryDisabled: {
-    opacity: 0.6,
-  },
-  primaryText: {
-    color: colors.textOnPrimary,
-    fontSize: 16,
-    fontFamily: FONT.title,
-    letterSpacing: -0.2,
-  },
-  secondaryBtn: {
-    marginTop: 14,
-    alignItems: "center",
-  },
-  secondaryText: {
-    color: colors.textOnLight,
-    fontSize: 13.5,
-    fontFamily: FONT.semi,
-  },
-  secondaryHint: {
-    marginTop: 2,
-    color: colors.mutedOnLight,
-    fontSize: 12,
-    fontFamily: FONT.reg,
-  },
-  footerNote: {
-    marginTop: 20,
-    color: colors.footerOnDark,
-    fontSize: 11.5,
-    lineHeight: 16,
-    textAlign: "center",
-    fontFamily: FONT.reg,
-  },
-});

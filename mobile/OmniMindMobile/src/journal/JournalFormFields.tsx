@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   View,
   Text,
@@ -7,11 +8,142 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { colors, fonts as FONT } from "../theme/colors";
+import {
+  fonts as FONT,
+  useOmniTheme,
+  type ThemePalette,
+} from "../theme/colors";
 import { MOOD_OPTIONS } from "./moodOptions";
 import { MusicSuggestionPlayer } from "./MusicSuggestionPlayer";
 
 const MIN_CHARS_FOR_INSIGHT = 10;
+
+function createJournalFormStyles(colors: ThemePalette) {
+  return StyleSheet.create({
+    scroll: { flex: 1 },
+    scrollContent: { paddingBottom: 24 },
+    card: {
+      borderRadius: 22,
+      padding: 18,
+      backgroundColor: colors.cardBackground,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    label: {
+      color: colors.labelOnLight,
+      fontSize: 12.5,
+      fontFamily: FONT.semi,
+    },
+    labelSpaced: { marginTop: 14 },
+    input: {
+      marginTop: 6,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      backgroundColor: colors.inputBackground,
+      color: colors.textOnLight,
+      fontFamily: FONT.reg,
+      fontSize: 14,
+    },
+    bodyInput: {
+      minHeight: 200,
+      paddingTop: 12,
+    },
+    moodRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      marginTop: 8,
+    },
+    moodChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+    },
+    moodChipActive: {
+      borderColor: colors.primary,
+      backgroundColor: "rgba(109, 128, 104, 0.12)",
+    },
+    moodEmoji: { fontSize: 13 },
+    moodLabel: {
+      fontSize: 12.5,
+      fontFamily: FONT.semi,
+      color: colors.textOnLight,
+    },
+    moodLabelActive: { color: colors.primaryPressed },
+    error: {
+      marginTop: 12,
+      color: colors.error,
+      fontSize: 13,
+      fontFamily: FONT.semi,
+    },
+    insightBlock: { marginTop: 16, gap: 10 },
+    insightSavedHint: {
+      fontSize: 12,
+      fontFamily: FONT.semi,
+      color: colors.mutedOnLight,
+    },
+    insightBtn: {
+      alignSelf: "flex-start",
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      backgroundColor: colors.white06,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      minWidth: 120,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    insightBtnDisabled: { opacity: 0.45, borderColor: colors.inputBorder },
+    pressedInsight: { opacity: 0.88 },
+    insightBtnText: {
+      color: colors.primary,
+      fontSize: 14,
+      fontFamily: FONT.semi,
+    },
+    insightHint: {
+      fontSize: 12,
+      fontFamily: FONT.reg,
+      color: colors.mutedOnLight,
+    },
+    insightErr: {
+      fontSize: 13,
+      fontFamily: FONT.semi,
+      color: colors.error,
+    },
+    insightCard: {
+      marginTop: 4,
+      padding: 14,
+      borderRadius: 16,
+      backgroundColor: "rgba(109, 128, 104, 0.08)",
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+    },
+    insightLabel: {
+      fontSize: 11,
+      fontFamily: FONT.semi,
+      color: colors.labelOnLight,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginBottom: 6,
+    },
+    insightBody: {
+      fontSize: 14,
+      fontFamily: FONT.reg,
+      color: colors.textOnLight,
+      lineHeight: 21,
+    },
+  });
+}
 
 type Props = {
   title: string;
@@ -42,6 +174,8 @@ export function JournalFormFields({
   insightComment = null,
   insightMusic = null,
 }: Props) {
+  const { colors } = useOmniTheme();
+  const styles = useMemo(() => createJournalFormStyles(colors), [colors]);
   const bodyTrim = body.trim();
   const canInsight = bodyTrim.length >= MIN_CHARS_FOR_INSIGHT;
   const showInsightArea =
@@ -153,127 +287,3 @@ export function JournalFormFields({
   );
 }
 
-const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  scrollContent: { paddingBottom: 24 },
-  card: {
-    borderRadius: 22,
-    padding: 18,
-    backgroundColor: colors.cardBackground,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  label: {
-    color: colors.labelOnLight,
-    fontSize: 12.5,
-    fontFamily: FONT.semi,
-  },
-  labelSpaced: { marginTop: 14 },
-  input: {
-    marginTop: 6,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    backgroundColor: colors.inputBackground,
-    color: colors.textOnLight,
-    fontFamily: FONT.reg,
-    fontSize: 14,
-  },
-  bodyInput: {
-    minHeight: 200,
-    paddingTop: 12,
-  },
-  moodRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 8,
-  },
-  moodChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: colors.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-  },
-  moodChipActive: {
-    borderColor: colors.primary,
-    backgroundColor: "rgba(109, 128, 104, 0.12)",
-  },
-  moodEmoji: { fontSize: 13 },
-  moodLabel: {
-    fontSize: 12.5,
-    fontFamily: FONT.semi,
-    color: colors.textOnLight,
-  },
-  moodLabelActive: { color: colors.primaryPressed },
-  error: {
-    marginTop: 12,
-    color: colors.error,
-    fontSize: 13,
-    fontFamily: FONT.semi,
-  },
-  insightBlock: { marginTop: 16, gap: 10 },
-  insightSavedHint: {
-    fontSize: 12,
-    fontFamily: FONT.semi,
-    color: colors.mutedOnLight,
-  },
-  insightBtn: {
-    alignSelf: "flex-start",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    backgroundColor: colors.white06,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    minWidth: 120,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  insightBtnDisabled: { opacity: 0.45, borderColor: colors.inputBorder },
-  pressedInsight: { opacity: 0.88 },
-  insightBtnText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontFamily: FONT.semi,
-  },
-  insightHint: {
-    fontSize: 12,
-    fontFamily: FONT.reg,
-    color: colors.mutedOnLight,
-  },
-  insightErr: {
-    fontSize: 13,
-    fontFamily: FONT.semi,
-    color: colors.error,
-  },
-  insightCard: {
-    marginTop: 4,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: "rgba(109, 128, 104, 0.08)",
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-  },
-  insightLabel: {
-    fontSize: 11,
-    fontFamily: FONT.semi,
-    color: colors.labelOnLight,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  insightBody: {
-    fontSize: 14,
-    fontFamily: FONT.reg,
-    color: colors.textOnLight,
-    lineHeight: 21,
-  },
-});

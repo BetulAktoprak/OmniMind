@@ -6,6 +6,8 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
 } from "@expo-google-fonts/inter";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ThemeProvider } from "../src/theme/colors";
 
 export default function Layout() {
     const [fontsLoaded] = useFonts({
@@ -18,6 +20,8 @@ export default function Layout() {
   if (!fontsLoaded) return null;
   
   return (
+    <SafeAreaProvider>
+      <ThemeProvider>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="login" />
@@ -25,5 +29,7 @@ export default function Layout() {
       <Stack.Screen name="home" />
       <Stack.Screen name="journal" options={{ headerShown: false }} />
     </Stack>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
