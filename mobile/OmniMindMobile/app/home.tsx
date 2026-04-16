@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Pressable,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { BackgroundMesh } from "../components/BackgroundMesh";
 import { CornerFloat3D } from "../components/CornerFloat3D";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,7 +37,7 @@ function createHomeStyles(colors: ThemePalette) {
       overflow: "hidden",
       justifyContent: "flex-start",
     },
-    main: { flexShrink: 0 },
+    main: { flexShrink: 0, zIndex: 2 },
     topBar: {
       flexDirection: "row",
       alignItems: "center",
@@ -141,7 +141,7 @@ export default function Home() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.container}>
         <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />

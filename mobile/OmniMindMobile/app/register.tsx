@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackgroundMesh } from "../components/BackgroundMesh";
 import { useRouter } from "expo-router";
+import { getAspNetApiErrorMessage } from "../src/api/apiError";
 import { registerApi } from "../src/api/auth.api";
 import { saveAuth } from "../src/auth/auth.store";
 import {
@@ -242,8 +243,8 @@ export default function Register() {
       });
       await saveAuth(auth);
       router.replace("/home");
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Kayıt başarısız. Bilgilerini kontrol et.");
+    } catch (e: unknown) {
+      setError(getAspNetApiErrorMessage(e));
     } finally {
       setLoading(false);
     }

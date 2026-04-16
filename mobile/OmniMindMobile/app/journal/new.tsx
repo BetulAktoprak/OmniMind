@@ -3,13 +3,13 @@ import {
   View,
   Text,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { analyzeJournalDraft } from "../../src/api/journalInsights.api";
 import { createJournal } from "../../src/api/journal.api";
@@ -141,7 +141,7 @@ export default function NewJournalScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <KeyboardAvoidingView
         style={styles.flex}

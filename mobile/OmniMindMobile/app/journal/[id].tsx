@@ -3,13 +3,13 @@ import {
   View,
   Text,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   ScrollView,
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { deleteJournal, getJournal } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
@@ -140,7 +140,7 @@ export default function JournalDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.topRow}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>

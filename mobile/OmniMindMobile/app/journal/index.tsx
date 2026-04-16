@@ -4,12 +4,12 @@ import {
   Text,
   FlatList,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { listJournals } from "../../src/api/journal.api";
 import { ApiError } from "../../src/api/apiError";
@@ -100,7 +100,7 @@ export default function JournalListScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />
 
@@ -243,6 +243,7 @@ function createJournalListStyles(colors: ThemePalette) {
     paddingHorizontal: 22,
     paddingTop: 8,
     paddingBottom: 4,
+    zIndex: 2,
   },
   backBtn: {
     width: 36,

@@ -3,13 +3,13 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { BackgroundMesh } from "../../components/BackgroundMesh";
 import { requestAccountDeletionApi } from "../../src/api/account.api";
@@ -26,6 +26,7 @@ function createStyles(colors: ThemePalette) {
       paddingHorizontal: 22,
       paddingTop: 18,
       paddingBottom: 18,
+      zIndex: 2,
     },
     title: {
       color: colors.textOnDark,
@@ -141,7 +142,7 @@ export default function AccountDeleteScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />
       <View style={styles.container}>

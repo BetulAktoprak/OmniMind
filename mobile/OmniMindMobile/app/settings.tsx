@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { BackgroundMesh } from "../components/BackgroundMesh";
 import { CornerFloat3D } from "../components/CornerFloat3D";
@@ -43,7 +43,7 @@ function createSettingsStyles(colors: ThemePalette) {
       paddingBottom: 18,
       overflow: "hidden",
     },
-    scroll: { flex: 1 },
+    scroll: { flex: 1, zIndex: 2 },
     scrollContent: { paddingBottom: 32 },
     topRow: {
       flexDirection: "row",
@@ -195,7 +195,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.container}>
         <BackgroundMesh accent={colors.primary} accent2={colors.accentDot} />
