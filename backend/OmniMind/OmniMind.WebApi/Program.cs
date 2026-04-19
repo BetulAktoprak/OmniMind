@@ -19,6 +19,9 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // WebApi csproj UserSecretsId — top-level Program yerine açık assembly işaretçisi kullan.
 builder.Configuration.AddUserSecrets<UserSecretsAssemblyMarker>();
 
@@ -33,15 +36,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<OmniMindDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<OmniMindDbContext>());
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.WebHost.UseUrls("http://0.0.0.0:5068");
-}
-else
-{
-    builder.WebHost.UseUrls("http://0.0.0.0:8080");
-}
 
 builder.Services.Configure<JournalAiRateLimitOptions>(
     builder.Configuration.GetSection(JournalAiRateLimitOptions.SectionName));
@@ -121,9 +115,7 @@ var key = jwtSection["Key"];
 if (string.IsNullOrWhiteSpace(key))
 {
     throw new InvalidOperationException(
-        "Jwt:Key boş. OmniMind.WebApi klasöründe çalıştırın:\n" +
-        "  dotnet user-secrets set \"Jwt:Key\" \"<en az ~32 karakter güçlü bir metin>\"\n" +
-        "Mevcut sırları görmek için: dotnet user-secrets list");
+        "Jwt:Key boş. OmniMind.WebApi klasöründe çalıştırın:");
 }
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
