@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { analyzeJournalDraft } from "../../src/api/journalInsights.api";
 import { createJournal } from "../../src/api/journal.api";
-import { ApiError } from "../../src/api/apiError";
+import { ApiError, getAspNetApiErrorMessage } from "../../src/api/apiError";
 import { logout } from "../../src/auth/auth.store";
 import { JournalFormFields } from "../../src/journal/JournalFormFields";
 import { CornerFloat3D } from "../../components/CornerFloat3D";
@@ -107,7 +107,7 @@ export default function NewJournalScreen() {
         router.replace("/login");
         return;
       }
-      setInsightError(e instanceof Error ? e.message : "Yorum alınamadı.");
+      setInsightError(getAspNetApiErrorMessage(e));
     } finally {
       setInsightLoading(false);
     }

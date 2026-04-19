@@ -1,16 +1,11 @@
 import { isAxiosError } from "axios";
 import { http } from "./http";
-import { ApiError } from "./apiError";
+import { ApiError, getAspNetApiErrorMessage } from "./apiError";
 import type { JournalDraftInsight } from "../types/journal";
-
-function msg(e: unknown): string {
-  const ax = e as { response?: { data?: { message?: string } } };
-  return ax?.response?.data?.message ?? "Bir hata oluştu.";
-}
 
 function rethrow(e: unknown): never {
   if (isAxiosError(e)) {
-    throw new ApiError(msg(e), e.response?.status);
+    throw new ApiError(getAspNetApiErrorMessage(e), e.response?.status);
   }
   throw e instanceof Error ? e : new Error(String(e));
 }

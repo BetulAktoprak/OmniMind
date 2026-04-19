@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OmniMind.Application.Abstractions;
 using OmniMind.Application.Common.Exceptions;
@@ -17,13 +18,21 @@ public sealed class OpenAiJournalInsightService : IJournalInsightService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    private const string UserFacingGeneric =
+        "Yapay zeka yorumu şu an alınamadı. Lütfen bir süre sonra tekrar deneyin.";
+
     private readonly HttpClient _http;
     private readonly OpenAiOptions _options;
+    private readonly ILogger<OpenAiJournalInsightService> _logger;
 
-    public OpenAiJournalInsightService(HttpClient http, IOptions<OpenAiOptions> options)
+    public OpenAiJournalInsightService(
+        HttpClient http,
+        IOptions<OpenAiOptions> options,
+        ILogger<OpenAiJournalInsightService> logger)
     {
         _http = http;
         _options = options.Value;
+        _logger = logger;
     }
 
     public async Task<JournalDraftInsight> AnalyzeDraftAsync(
@@ -32,8 +41,10 @@ public sealed class OpenAiJournalInsightService : IJournalInsightService
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_options.ApiKey))
-            throw new ExternalServiceException(
-                "Yapay zeka API anahtarı yapılandırılmamış. User secrets veya ortamda OpenAI:ApiKey (Groq için gsk_...) tanımlayın.");
+        {
+            _logger.LogError("Journal LLM: OpenAI:ApiKey is empty; configure OpenAI__ApiKey on the host.");
+            throw new ExternalServiceException(UserFacingGeneric);
+        }
 
         var systemPrompt =
             """
@@ -82,22 +93,17 @@ public sealed class OpenAiJournalInsightService : IJournalInsightService
 
         if (!response.IsSuccessStatusCode)
         {
-            var openAiDetail = TryExtractOpenAiErrorMessage(raw);
+            LogProviderFailure(response.StatusCode, raw);
+
             var msg = response.StatusCode switch
             {
                 HttpStatusCode.TooManyRequests =>
-                    "LLM sağlayıcısı isteği kabul etmedi (429: çok sık istek veya kota). "
-                    + "Birkaç dakika sonra tekrar deneyin; OpenAI: platform.openai.com — Groq: console.groq.com Usage/Limits."
-                    + (openAiDetail != null ? $" Detay: {openAiDetail}" : ""),
+                    "Çok sık istek gönderildi veya günlük kota doldu. Lütfen bir süre sonra tekrar deneyin.",
                 HttpStatusCode.Unauthorized =>
-                    "API anahtarı geçersiz veya yetkisiz (401). Anahtarı ve BaseUrl / model adını kontrol edin."
-                    + (openAiDetail != null ? $" {openAiDetail}" : ""),
+                    UserFacingGeneric,
                 HttpStatusCode.PaymentRequired =>
-                    "Sağlayıcı ödeme veya kota nedeniyle isteği reddetti. Hesap ve faturalandırmayı kontrol edin."
-                    + (openAiDetail != null ? $" {openAiDetail}" : ""),
-                _ =>
-                    $"Yapay zeka servisi hata döndü ({(int)response.StatusCode})."
-                    + (openAiDetail != null ? $" {openAiDetail}" : ""),
+                    "Yapay zeka servisi hesap veya kota nedeniyle isteği reddetti. Lütfen daha sonra tekrar deneyin.",
+                _ => UserFacingGeneric,
             };
             throw new ExternalServiceException(msg);
         }
@@ -132,6 +138,23 @@ public sealed class OpenAiJournalInsightService : IJournalInsightService
             throw new ExternalServiceException("Yapay zeka eksik alan döndürdü.");
 
         return new JournalDraftInsight(comment, music);
+    }
+
+    private void LogProviderFailure(HttpStatusCode status, string raw)
+    {
+        // 401 yanıt gövdesi sağlayıcıdan anahtar parçaları içerebilir; loglamayın.
+        if (status == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogWarning(
+                "Journal LLM provider returned 401. Check OpenAI__ApiKey and OpenAI__BaseUrl (e.g. Groq needs https://api.groq.com/openai/v1).");
+            return;
+        }
+
+        var detail = TryExtractOpenAiErrorMessage(raw);
+        if (detail != null)
+            _logger.LogWarning("Journal LLM provider error {Status}: {Detail}", (int)status, detail);
+        else
+            _logger.LogWarning("Journal LLM provider error {Status}, body length {Length}.", (int)status, raw.Length);
     }
 
     private static string? TryExtractOpenAiErrorMessage(string raw)
