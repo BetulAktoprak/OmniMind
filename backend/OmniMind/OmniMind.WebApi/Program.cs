@@ -22,7 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// WebApi csproj UserSecretsId — top-level Program yerine açık assembly işaretçisi kullan.
 builder.Configuration.AddUserSecrets<UserSecretsAssemblyMarker>();
 
 builder.Services.AddControllers()
@@ -147,7 +146,6 @@ builder.Services.AddHostedService<AccountHardDeletionWorker>();
 
 var app = builder.Build();
 
-// Üretimde API yüzeyini ve şema sızıntısını önlemek için yalnızca Development.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -157,7 +155,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders();
 
-if (!app.Environment.IsDevelopment())
+var runningOnRender = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RENDER"));
+if (!app.Environment.IsDevelopment() && !runningOnRender)
 {
     app.UseHttpsRedirection();
 }
