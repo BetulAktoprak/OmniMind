@@ -2,7 +2,7 @@
   "expo": {
     "name": "OmniMind",
     "slug": "OmniMindMobile",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "omnimindmobile",
@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#0f1f38",

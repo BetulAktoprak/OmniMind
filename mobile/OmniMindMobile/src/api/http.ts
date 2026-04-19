@@ -3,8 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 /**
- * EXPO_PUBLIC_API_URL: Expo `.env.development` / `.env.production` (veya `.env`) ile gelir; Metro yeniden başlatılmalı.
- * Tanımlı değilse: Android emülatör 10.0.2.2:5068, iOS simülatör localhost:5068; fiziksel cihazda LAN IP yaz.
+ * EXPO_PUBLIC_API_URL: Store / EAS build için `eas.json` içindeki `env` (bkz. production/preview profilleri),
+ * yerel geliştirmede `.env` / `.env.development` ile tanımlanır; Metro yeniden başlatılmalı.
+ * Tanımlı değilse: Android emülatör 10.0.2.2:5068, iOS simülatör localhost:5068 — Play Store APK’da kullanılmamalı.
  */
 const fromEnv =
   typeof process.env.EXPO_PUBLIC_API_URL === "string" &&
